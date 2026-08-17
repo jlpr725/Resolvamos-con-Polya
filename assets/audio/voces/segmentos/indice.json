@@ -1,0 +1,121 @@
+[
+ {
+  "archivo": "seg_01.mp3",
+  "inicio": 1.25,
+  "fin": 10.04,
+  "duracion": 8.8,
+  "volumen_medio_db": -20.6
+ },
+ {
+  "archivo": "seg_02.mp3",
+  "inicio": 10.04,
+  "fin": 25.04,
+  "duracion": 15.0,
+  "volumen_medio_db": -21.8
+ },
+ {
+  "archivo": "seg_03.mp3",
+  "inicio": 25.04,
+  "fin": 34.29,
+  "duracion": 9.2,
+  "volumen_medio_db": -20.8
+ },
+ {
+  "archivo": "seg_04.mp3",
+  "inicio": 34.29,
+  "fin": 38.33,
+  "duracion": 4.0,
+  "volumen_medio_db": -21.0
+ },
+ {
+  "archivo": "seg_06.mp3",
+  "inicio": 39.58,
+  "fin": 44.12,
+  "duracion": 4.5,
+  "volumen_medio_db": -20.3
+ },
+ {
+  "archivo": "seg_07.mp3",
+  "inicio": 44.12,
+  "fin": 55.54,
+  "duracion": 11.4,
+  "volumen_medio_db": -21.9
+ },
+ {
+  "archivo": "seg_08.mp3",
+  "inicio": 55.54,
+  "fin": 58.75,
+  "duracion": 3.2,
+  "volumen_medio_db": -20.8
+ },
+ {
+  "archivo": "seg_09.mp3",
+  "inicio": 58.75,
+  "fin": 77.5,
+  "duracion": 18.8,
+  "volumen_medio_db": -22.8
+ },
+ {
+  "archivo": "seg_10.mp3",
+  "inicio": 77.5,
+  "fin": 103.33,
+  "duracion": 25.8,
+  "volumen_medio_db": -20.6
+ },
+ {
+  "archivo": "seg_11.mp3",
+  "inicio": 103.33,
+  "fin": 148.33,
+  "duracion": 45.0,
+  "volumen_medio_db": -21.1
+ },
+ {
+  "archivo": "seg_12.mp3",
+  "inicio": 148.33,
+  "fin": 157.92,
+  "duracion": 9.6,
+  "volumen_medio_db": -20.6
+ },
+ {
+  "archivo": "seg_13.mp3",
+  "inicio": 157.92,
+  "fin": 188.75,
+  "duracion": 30.8,
+  "volumen_medio_db": -23.0
+ },
+ {
+  "archivo": "seg_14.mp3",
+  "inicio": 188.75,
+  "fin": 217.46,
+  "duracion": 28.7,
+  "volumen_medio_db": -22.2
+ },
+ {
+  "archivo": "seg_15.mp3",
+  "inicio": 217.46,
+  "fin": 238.0,
+  "duracion": 20.5,
+  "volumen_medio_db": -22.1
+ },
+ {
+  "archivo": "seg_16.mp3",
+  "inicio": 238.0,
+  "fin": 255.96,
+  "duracion": 18.0,
+  "volumen_medio_db": -21.6
+ },
+ {
+  "archivo": "seg_17.mp3",
+  "inicio": 255.96,
+  "fin": 277.88,
+  "duracion": 21.9,
+  "volumen_medio_db": -23.8
+ },
+ {
+  "archivo": "seg_18.mp3",
+  "inicio": 277.88,
+  "fin": 302.58,
+  "duracion": 24.7,
+  "volumen_medio_db": -25.9
+ }
+]

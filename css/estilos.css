@@ -1,0 +1,757 @@
+/* ============================================================
+   Resolvamos con Pólya — PWA
+   Identidad tomada de los recursos entregados:
+   crema #fff8f1, naranja #e06b38, marrón tinta #4a3325.
+   Títulos en Fredoka, cuerpo en Nunito, iconos Material Rounded.
+
+   REGLA DE ORO: la app ocupa la altura exacta de la pantalla.
+   Nunca hay scroll de página; si algo no cabe, se desplaza
+   dentro de su propio bloque.
+   ============================================================ */
+
+:root{
+  --crema:        #fff8f1;
+  --crema-2:      #fdf0e4;
+  --papel:        #ffffff;
+  --naranja:      #e06b38;   /* identidad: fondos, bordes, gráficos */
+  --naranja-osc:  #a8502a;   /* relieve de botones */
+  /* Variantes accesibles (WCAG 2.2 AA). El naranja de marca solo alcanza
+     3.3:1 sobre blanco, así que el TEXTO usa estas versiones oscuras.
+     Ver INFORME-ACCESIBILIDAD.md */
+  --naranja-txt:  #b3552c;   /* 4.94:1 sobre blanco */
+  --naranja-btn:  #b3552c;   /* fondo de botón: blanco encima 4.94:1 */
+  --naranja-cl:   #f2a883;
+  --naranja-sua:  #fde7d8;
+  --tinta:        #4a3325;
+  --tinta-2:      #6e5b4f;   /* 6.42:1 sobre blanco */
+  --rojo:         #d94f4f;
+  --rojo-txt:     #ad3f3f;   /* blanco encima 5.90:1 */
+  --rojo-sua:     #fde3e3;
+  --verde:        #4f9d69;
+  --verde-txt:    #3b754e;   /* 4.78:1 sobre el verde suave */
+  --verde-btn:    #3f7d54;   /* blanco encima 4.91:1 */
+  --verde-sua:    #e3f4e8;
+  --oro:          #f5b731;
+  --oro-sua:      #fdf0cf;
+  --rosa:         #e98a8a;
+  --rosa-cl:      #f3b5b5;
+
+  --r-xl:34px; --r-lg:24px; --r-md:16px; --r-sm:11px;
+  --sombra:      0 4px 14px rgba(120,80,50,.10);
+  --sombra-alta: 0 16px 40px rgba(120,80,50,.22);
+
+  --titulo:"Fredoka","Nunito",system-ui,sans-serif;
+  --cuerpo:"Nunito",system-ui,-apple-system,sans-serif;
+  --ancho:1500px;
+  --sup:env(safe-area-inset-top,0px);
+  --inf:env(safe-area-inset-bottom,0px);
+}
+
+*{
+  box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+  /* Punto 10: en una app para niños, seleccionar texto sin querer
+     al arrastrar el dedo es una molestia constante. */
+  -webkit-user-select:none; user-select:none;
+}
+input,textarea{ -webkit-user-select:text; user-select:text; }
+img{ -webkit-user-drag:none; user-drag:none; }
+[hidden]{ display:none !important; }
+
+html,body{ margin:0; padding:0; height:100%; overflow:hidden; background:var(--crema); }
+
+body{
+  font-family:var(--cuerpo); color:var(--tinta);
+  background:url("../assets/img/background.webp") center/cover fixed no-repeat, var(--crema);
+  -webkit-font-smoothing:antialiased;
+}
+
+.material-symbols-rounded{
+  font-family:'Material Symbols Rounded';
+  font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;
+  line-height:1; user-select:none;
+  /* Si la fuente de iconos no llega a cargar, el navegador dibujaría el
+     nombre del icono como texto y reventaría el ancho de los botones.
+     Con caja fija y recorte, el diseño aguanta igual. */
+  display:inline-grid; place-items:center;
+  width:1em; height:1em; overflow:hidden; white-space:nowrap;
+}
+
+h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacing:.01em; }
+
+/* ---------------- Estructura ---------------- */
+.marco{
+  height:100dvh; max-width:var(--ancho); margin:0 auto;
+  padding:calc(80px + var(--sup)) clamp(14px,2.5vw,34px) calc(8px + var(--inf));
+  display:grid; grid-template-rows:auto minmax(0,1fr) auto;
+  grid-template-columns:minmax(0,1fr);
+  gap:clamp(6px,1.2vh,14px); overflow:hidden;
+}
+
+/* ---------------- Cabecera ---------------- */
+.cabecera{ display:flex; align-items:center; gap:12px; min-height:clamp(52px,8vh,84px); }
+.cabecera__logo{ flex:none; height:clamp(46px,9vh,92px); width:auto; }
+.cabecera__centro{ flex:1; min-width:0; text-align:center; }
+.cabecera__titulo{
+  margin:0; font-size:clamp(1rem,2.7vh,1.75rem); font-weight:600; color:var(--tinta);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.cabecera__sub{
+  margin:1px 0 0; font-family:var(--titulo); font-weight:500;
+  font-size:clamp(.72rem,1.7vh,1.05rem); color:var(--naranja-txt);
+}
+
+.contador{
+  flex:none; display:inline-flex; align-items:center; gap:8px;
+  padding:7px 16px 7px 11px; border-radius:99px;
+  background:var(--oro-sua); border:2px solid #f6dda6;
+  font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(1rem,2.4vh,1.6rem);
+}
+.contador img{ width:1.35em; height:1.35em; }
+
+.llamador{
+  flex:none; display:grid; place-items:center; padding:5px;
+  width:clamp(42px,6.6vh,66px); aspect-ratio:1;
+  border-radius:var(--r-md); border:2px solid #e8d7c6;
+  background:var(--crema-2); cursor:not-allowed;
+  transition:transform .2s, box-shadow .3s, filter .3s;
+}
+.llamador img{ width:100%; height:100%; object-fit:contain; filter:grayscale(1); opacity:.45; }
+.llamador[data-activo="1"]{
+  cursor:pointer; border-color:var(--naranja); background:var(--naranja-sua);
+  animation:respira 2.2s ease-in-out infinite;
+}
+.llamador[data-activo="1"] img{ filter:none; opacity:1; }
+@keyframes respira{
+  0%,100%{ transform:scale(1);    box-shadow:0 0 0 0 rgba(224,107,56,.45) }
+  50%    { transform:scale(1.07); box-shadow:0 0 0 14px rgba(224,107,56,0) }
+}
+.llamador:focus-visible{ outline:3px solid var(--naranja); outline-offset:3px; }
+
+/* ---------------- Pie fijo ---------------- */
+.pie-fijo{ display:flex; align-items:center; gap:12px; min-height:clamp(46px,7vh,72px); }
+.pie-fijo__lema{
+  flex:1; margin:0; text-align:center; font-family:var(--titulo); font-weight:500;
+  font-size:clamp(.7rem,1.6vh,1.05rem); color:var(--tinta-2);
+}
+.redondo{
+  flex:none; display:grid; place-items:center;
+  width:clamp(42px,6.4vh,64px); aspect-ratio:1; padding:0;
+  border:none; border-radius:50%;
+  background:var(--naranja-btn); color:#fff; cursor:pointer;
+  box-shadow:0 3px 0 var(--naranja-osc);
+  transition:transform .14s, box-shadow .14s;
+}
+.redondo:active{ transform:translateY(3px); box-shadow:none; }
+.redondo:focus-visible{ outline:3px solid var(--tinta); outline-offset:3px; }
+.redondo .material-symbols-rounded{ font-size:clamp(20px,3.2vh,30px); }
+.redondo--mini{ width:34px; box-shadow:none; }
+
+/* ---------------- Vista ---------------- */
+.vista{
+  min-height:0; min-width:0; display:flex; flex-direction:column;
+  animation:surgir .35s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes surgir{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }
+
+.centrado{
+  min-height:0; flex:1; width:100%; max-width:1040px; margin:0 auto;
+  overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; padding-right:3px;
+}
+.centrado::-webkit-scrollbar{ width:8px; }
+.centrado::-webkit-scrollbar-thumb{ background:var(--naranja-cl); border-radius:99px; }
+
+/* ---------------- Botones ---------------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  padding:clamp(11px,1.9vh,17px) clamp(26px,3vw,44px);
+  border:none; border-radius:var(--r-md);
+  font-family:var(--titulo); font-weight:600;
+  font-size:clamp(1rem,2.3vh,1.5rem);
+  color:#fff; background:var(--naranja-btn); cursor:pointer;
+  box-shadow:0 4px 0 var(--naranja-osc);
+  transition:transform .13s, box-shadow .13s, filter .2s;
+}
+.btn:hover{ filter:brightness(1.05); }
+.btn:active{ transform:translateY(4px); box-shadow:0 0 0 var(--naranja-osc); }
+.btn:focus-visible{ outline:3px solid var(--tinta); outline-offset:3px; }
+.btn .material-symbols-rounded{ font-size:1.2em; }
+.btn--ancho{ width:100%; }
+.btn--pequeno{ font-size:.95rem; padding:9px 18px; }
+.btn--verde{ background:var(--verde-btn); box-shadow:0 4px 0 #2e5d3e; }
+.btn--verde:active{ box-shadow:0 0 0 #2e5d3e; }
+.btn--claro{
+  background:var(--papel); color:var(--naranja-txt);
+  border:2px solid var(--naranja); box-shadow:0 4px 0 var(--naranja-cl);
+}
+.btn--claro:active{ box-shadow:0 0 0; }
+.btn[disabled]{ opacity:.45; pointer-events:none; }
+
+.enlace{
+  display:inline-flex; align-items:center; gap:9px;
+  background:none; border:none; cursor:pointer;
+  font-family:var(--cuerpo); font-weight:700; color:var(--naranja-txt);
+  font-size:clamp(.85rem,1.9vh,1.15rem);
+}
+.enlace:hover{ text-decoration:underline; }
+.enlace__i{
+  display:grid; place-items:center; width:1.7em; aspect-ratio:1;
+  border-radius:50%; background:var(--naranja-btn); color:#fff; font-size:18px;
+}
+
+/* ---------------- Portada ---------------- */
+.portada{
+  flex:1; min-height:0; width:100%;
+  display:grid; align-content:center; justify-content:center; justify-items:center;
+  gap:clamp(10px,2vh,26px); text-align:center;
+}
+/* Punto 1: los textos respiran en un contenedor más ancho (960 px). */
+.portada__desc{
+  margin:0; width:min(960px,92vw); color:var(--tinta);
+  font-size:clamp(.95rem,2.3vh,1.5rem); line-height:1.5;
+}
+.portada__creditos{
+  margin:0; width:min(960px,92vw); color:var(--naranja-cl); font-weight:600;
+  font-size:clamp(.65rem,1.45vh,.95rem); line-height:1.5;
+}
+
+/* Punto 14: la portada respira y flota; los signos giran despacio alrededor. */
+.portada__orbita{
+  position:relative; display:grid; place-items:center;
+  width:min(46vh,330px,78vw); aspect-ratio:1;
+  overflow:hidden;              /* las chispas nunca se salen de la pantalla */
+}
+.portada__logo{
+  width:76%; max-height:100%; object-fit:contain; position:relative; z-index:1;
+  animation:flotarLogo 8.5s ease-in-out infinite;
+}
+@keyframes flotarLogo{
+  0%,100%{ transform:translateY(0) rotate(-0.5deg) }
+  50%    { transform:translateY(-14px) rotate(0.5deg) }
+}
+.chispa{
+  position:absolute; left:50%; top:50%;
+  font-family:var(--titulo); font-weight:600; color:var(--naranja-cl);
+  font-size:clamp(1.1rem,2.5vh,2rem); opacity:.75;
+  transform-origin:0 0;
+  animation:orbita 18s linear infinite;
+  animation-delay:calc(var(--i) * -3s);
+}
+@keyframes orbita{
+  from{ transform:rotate(0deg) translateX(var(--radio)) rotate(0deg) }
+  to  { transform:rotate(360deg) translateX(var(--radio)) rotate(-360deg) }
+}
+.portada__orbita{ --radio:min(21vh,158px,34vw); }
+.btn--grande{ font-size:clamp(1.1rem,2.7vh,1.75rem); padding:clamp(13px,2.2vh,22px) clamp(34px,4vw,60px); }
+
+/* ---------------- Selección de cuento ---------------- */
+.intro{
+  margin:0 auto clamp(12px,2.4vh,26px); max-width:56ch; text-align:center;
+  font-size:clamp(.95rem,2.3vh,1.45rem); color:var(--tinta); line-height:1.45;
+}
+.cuentos{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(14px,2.4vw,34px); }
+.cuento{
+  display:grid; gap:12px; justify-items:center; padding:0;
+  background:none; border:none; cursor:pointer; font-family:var(--cuerpo);
+}
+.cuento__marco{
+  width:100%; border-radius:var(--r-lg); overflow:hidden;
+  border:4px solid var(--naranja); background:var(--papel);
+  transition:transform .16s, box-shadow .2s;
+}
+.cuento:hover .cuento__marco{ transform:translateY(-4px); box-shadow:var(--sombra-alta); }
+.cuento:active .cuento__marco{ transform:scale(.98); }
+.cuento:focus-visible .cuento__marco{ outline:4px solid var(--tinta); outline-offset:3px; }
+.cuento__marco img{ width:100%; aspect-ratio:16/10; object-fit:contain; display:block; background:var(--crema); }
+.cuento__nombre{
+  margin:0; font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(1rem,2.5vh,1.6rem);
+}
+.cuento__estado{ margin:0; font-size:clamp(.72rem,1.6vh,.95rem); color:var(--tinta-2); font-weight:700; }
+
+/* ---------------- Avance del cuento (capítulos) ---------------- */
+.capitulos{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:clamp(9px,1.6vw,18px); margin-bottom:clamp(16px,3vh,38px);
+}
+.capitulo{
+  position:relative; display:flex; align-items:center; justify-content:space-between;
+  gap:10px; padding:0; overflow:hidden;
+  border:none; border-radius:99px; cursor:pointer;
+  background:var(--rosa-cl); font-family:var(--titulo); font-weight:600;
+  font-size:clamp(.85rem,2vh,1.25rem); color:var(--tinta);
+  transition:transform .15s;
+}
+.capitulo:hover{ transform:translateY(-3px); }
+.capitulo:active{ transform:scale(.98); }
+.capitulo:focus-visible{ outline:3px solid var(--tinta); outline-offset:3px; }
+.capitulo__relleno{
+  position:absolute; left:0; top:0; bottom:0; width:0;
+  background:var(--rojo-txt); border-radius:99px;
+  transition:width .8s cubic-bezier(.2,.8,.3,1);
+}
+.capitulo__nombre{
+  position:relative; padding:clamp(9px,1.7vh,15px) clamp(12px,1.5vw,20px);
+  color:#fff; white-space:nowrap;
+}
+.capitulo__pct{ position:relative; padding-right:clamp(12px,1.5vw,20px); font-weight:600; }
+.capitulo[data-bloqueado]{ background:var(--crema-2); color:var(--tinta-2); cursor:not-allowed; }
+.capitulo[data-bloqueado] .capitulo__nombre{ color:var(--tinta-2); }
+.capitulo[data-bloqueado] .material-symbols-rounded{ font-size:1.1em; vertical-align:-.15em; }
+
+/* Barra camino al tesoro */
+.camino{
+  position:relative; display:flex; align-items:center;
+  max-width:900px; margin:0 auto; padding:0 clamp(34px,5vh,54px);
+}
+.camino__pista{
+  flex:1; position:relative; height:clamp(34px,5.4vh,54px);
+  border-radius:99px; background:#8a5a3c; overflow:hidden;
+  display:grid; place-items:center;
+}
+.camino__relleno{
+  position:absolute; left:0; top:0; bottom:0; width:0;
+  background:linear-gradient(180deg,#ffd873,var(--oro));
+  border-radius:99px; transition:width 1s cubic-bezier(.2,.8,.3,1);
+}
+.camino__cifra{
+  position:relative; font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(.95rem,2.4vh,1.5rem);
+}
+.camino__extremo{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:clamp(52px,8vh,84px); aspect-ratio:1; border-radius:50%;
+  background:var(--naranja); border:3px solid var(--naranja-osc);
+  display:grid; place-items:center; overflow:hidden; z-index:1;
+}
+.camino__extremo--ini{ left:0; }
+.camino__extremo--fin{ right:0; }
+.camino__extremo img{ width:82%; height:82%; object-fit:contain; }
+.camino__extremo--fin[data-abierto]{ animation:latir 1.6s ease-in-out infinite; }
+@keyframes latir{ 0%,100%{transform:translateY(-50%) scale(1)} 50%{transform:translateY(-50%) scale(1.12)} }
+
+/* ---------------- Pantalla del cuento ---------------- */
+.escena{
+  flex:1; min-height:0; display:grid; gap:clamp(12px,2vw,26px);
+  grid-template-columns:minmax(0,.85fr) minmax(0,1.6fr) auto;
+  align-items:stretch;
+}
+.escena__ilustracion{
+  align-self:center; max-height:100%; min-height:0;
+  border-radius:var(--r-lg); overflow:hidden;
+  background:var(--papel); border:2px solid var(--naranja-sua);
+  display:grid; place-items:center;
+}
+.escena__ilustracion img{
+  width:100%; height:auto; max-height:100%; object-fit:contain;
+  animation:aparece .5s ease both;
+}
+@keyframes aparece{ from{opacity:0; transform:scale(.97)} to{opacity:1; transform:none} }
+
+.hoja{
+  min-height:0; display:flex; flex-direction:column;
+  padding:clamp(16px,2.6vh,34px) clamp(16px,2vw,38px);
+  border-radius:var(--r-xl); background:var(--papel); box-shadow:var(--sombra);
+  overflow-y:auto; scrollbar-width:thin;
+}
+.hoja::-webkit-scrollbar{ width:8px; }
+.hoja::-webkit-scrollbar-thumb{ background:var(--naranja-cl); border-radius:99px; }
+.hoja__titulo{
+  margin:0 0 clamp(8px,1.6vh,18px); font-family:var(--titulo); font-weight:600;
+  font-size:clamp(1.15rem,3.4vh,2.3rem); color:var(--tinta);
+}
+.hoja__texto{
+  margin:0 0 12px; line-height:1.55; color:var(--tinta);
+  font-size:clamp(.95rem,2.3vh,1.5rem);
+}
+.hoja__texto b{ font-weight:800; }
+.hoja__texto:last-child{ margin-bottom:0; }
+
+/* Martín y sus controles */
+.martin{
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  gap:clamp(8px,1.6vh,16px); width:clamp(120px,17vw,290px);
+}
+.martin__figura{ width:100%; object-fit:contain; min-height:0; flex:1; }
+.martin__controles{ display:flex; gap:clamp(6px,1vw,14px); flex:none; min-width:0; }
+.martin__btn{
+  display:grid; place-items:center; padding:0;
+  width:clamp(38px,5.6vh,62px); aspect-ratio:1;
+  border:none; border-radius:50%; background:var(--naranja-btn); color:#fff;
+  cursor:pointer; box-shadow:0 3px 0 var(--naranja-osc);
+  transition:transform .13s, box-shadow .13s;
+}
+.martin__btn:active{ transform:translateY(3px); box-shadow:none; }
+.martin__btn:focus-visible{ outline:3px solid var(--tinta); outline-offset:3px; }
+.martin__btn[disabled]{ opacity:.35; pointer-events:none; }
+.martin__btn .material-symbols-rounded{ font-size:clamp(20px,3vh,32px); }
+
+.puntos{ display:flex; gap:7px; justify-content:center; flex:none; }
+.puntos i{
+  width:9px; height:9px; border-radius:50%; background:var(--naranja-cl);
+  transition:background .3s, transform .3s;
+}
+.puntos i[data-activo]{ background:var(--naranja); transform:scale(1.35); }
+
+/* ---------------- Modal ---------------- */
+.modal{
+  position:fixed; inset:0; z-index:60; display:grid; place-items:center;
+  background:rgba(74,51,37,.45); backdrop-filter:blur(3px);
+  padding:clamp(12px,3vh,40px); animation:surgir .3s both;
+}
+.modal__caja{
+  width:100%; max-width:1180px; max-height:92dvh; overflow-y:auto;
+  padding:clamp(18px,3vh,40px) clamp(18px,3vw,44px);
+  border-radius:var(--r-xl); background:var(--crema);
+  box-shadow:var(--sombra-alta); scrollbar-width:thin;
+}
+.modal__caja::-webkit-scrollbar{ width:8px; }
+.modal__caja::-webkit-scrollbar-thumb{ background:var(--naranja-cl); border-radius:99px; }
+
+/* Aparición de Pólya */
+.polya-modal{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(16px,2.5vw,40px); align-items:center; }
+.polya-modal__figura{ width:clamp(160px,34vh,430px); object-fit:contain; }
+.globo{
+  position:relative; padding:clamp(14px,2.2vh,26px) clamp(16px,2vw,30px);
+  border-radius:var(--r-lg); background:var(--papel);
+  font-size:clamp(.95rem,2.3vh,1.5rem); line-height:1.45; text-align:center;
+  margin-bottom:clamp(12px,2vh,24px);
+}
+.globo::after{
+  content:''; position:absolute; left:-12px; top:34px;
+  border:12px solid transparent; border-right-color:var(--papel);
+}
+.paso-fila{
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(10px,1.5vw,20px);
+  align-items:center; margin-bottom:clamp(8px,1.5vh,16px);
+}
+.paso-fila__icono{
+  display:grid; place-items:center; width:clamp(38px,5.6vh,62px); aspect-ratio:1;
+  border-radius:50%; background:var(--naranja-btn); color:#fff;
+}
+.paso-fila__icono .material-symbols-rounded{ font-size:clamp(20px,3vh,32px); }
+.paso-fila__texto{ margin:0; font-size:clamp(.85rem,2vh,1.3rem); line-height:1.4; }
+.paso-fila__texto b{ font-weight:800; }
+
+/* ---------------- Resolución del problema ---------------- */
+.reto{ flex:1; min-height:0; display:grid; gap:clamp(10px,1.8vw,24px);
+  grid-template-columns:minmax(0,.8fr) minmax(0,1.7fr); align-items:stretch; }
+.reto__lado{ min-height:0; display:flex; flex-direction:column; gap:10px; }
+.reto__ilustracion{
+  flex:1; min-height:0; border-radius:var(--r-lg); overflow:hidden;
+  background:var(--papel); border:2px solid var(--naranja-sua); display:grid; place-items:center;
+}
+.reto__ilustracion img{ width:100%; height:100%; object-fit:contain; padding:6px; }
+.reto__panel{
+  min-height:0; display:flex; flex-direction:column; gap:clamp(8px,1.4vh,16px);
+  padding:clamp(14px,2.4vh,30px) clamp(14px,2vw,32px);
+  border-radius:var(--r-xl); background:var(--papel); box-shadow:var(--sombra);
+  overflow-y:auto; scrollbar-width:thin;
+}
+.reto__panel::-webkit-scrollbar{ width:8px; }
+.reto__panel::-webkit-scrollbar-thumb{ background:var(--naranja-cl); border-radius:99px; }
+
+.pasos-tira{ display:flex; gap:clamp(5px,.8vw,12px); flex:none; }
+.pasos-tira__item{
+  flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; gap:7px;
+  padding:clamp(7px,1.3vh,13px) 6px; border-radius:99px;
+  background:var(--crema-2); color:var(--tinta-2);
+  font-family:var(--titulo); font-weight:600; font-size:clamp(.65rem,1.5vh,1rem);
+  transition:background .3s, color .3s;
+}
+.pasos-tira__item .material-symbols-rounded{ font-size:clamp(15px,2.2vh,22px); }
+.pasos-tira__item[data-activo]{ background:var(--naranja-btn); color:#fff; }
+.pasos-tira__item[data-hecho]{ background:var(--verde-sua); color:var(--verde-txt); }
+
+.rotulo{
+  margin:0; font-family:var(--titulo); font-weight:600; color:var(--naranja-txt);
+  font-size:clamp(.78rem,1.8vh,1.15rem);
+}
+.pregunta{
+  margin:0; font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(1rem,2.6vh,1.7rem); line-height:1.3;
+}
+.enunciado{
+  margin:0; padding:clamp(11px,1.8vh,18px) clamp(13px,1.6vw,22px);
+  border-radius:var(--r-md); background:var(--crema-2);
+  font-size:clamp(.88rem,2vh,1.25rem); line-height:1.5;
+}
+.enunciado b{ font-weight:800; color:var(--naranja-txt); }
+
+.fichas{ display:flex; flex-wrap:wrap; gap:clamp(8px,1.2vw,14px); }
+.ficha{
+  display:grid; gap:2px; justify-items:center; padding:clamp(9px,1.5vh,16px) clamp(14px,1.8vw,26px);
+  border-radius:var(--r-md); border:3px solid var(--crema-2); background:var(--papel);
+  font-family:var(--cuerpo); color:var(--tinta); cursor:pointer;
+  transition:transform .14s, border-color .2s, background .2s;
+}
+.ficha:hover{ border-color:var(--naranja-cl); }
+.ficha:active{ transform:scale(.95); }
+.ficha:focus-visible{ outline:3px solid var(--naranja); outline-offset:2px; }
+.ficha b{ font-family:var(--titulo); font-weight:600; line-height:1; font-size:clamp(1.3rem,3.2vh,2.3rem); }
+.ficha span{ font-size:clamp(.6rem,1.4vh,.9rem); color:var(--tinta-2); font-weight:700; }
+.ficha[data-elegida]{ border-color:var(--verde); background:var(--verde-sua); }
+.ficha[data-mala]{ border-color:var(--rojo); background:var(--rojo-sua); animation:temblar .32s; }
+@keyframes temblar{ 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
+
+.opciones{ display:grid; gap:clamp(7px,1.2vh,12px); }
+.opcion{
+  display:flex; align-items:center; gap:clamp(10px,1.4vw,18px); width:100%;
+  padding:clamp(10px,1.7vh,18px) clamp(12px,1.6vw,22px); text-align:left;
+  border:3px solid var(--crema-2); border-radius:var(--r-md);
+  background:var(--papel); color:var(--tinta); cursor:pointer;
+  font-family:var(--cuerpo); font-weight:700; line-height:1.35;
+  font-size:clamp(.88rem,2vh,1.3rem);
+  transition:transform .14s, border-color .2s, background .2s;
+}
+.opcion:hover:not([disabled]){ border-color:var(--naranja-cl); }
+.opcion:active:not([disabled]){ transform:scale(.99); }
+.opcion:focus-visible{ outline:3px solid var(--naranja); outline-offset:2px; }
+.opcion small{ display:block; color:var(--tinta-2); font-weight:600; font-size:.8em; }
+.opcion__letra{
+  flex:none; display:grid; place-items:center;
+  width:clamp(30px,4.8vh,50px); aspect-ratio:1; border-radius:50%;
+  background:var(--crema-2); color:var(--naranja-txt);
+  font-family:var(--titulo); font-weight:600; font-size:clamp(.85rem,1.9vh,1.25rem);
+}
+.opcion__letra .material-symbols-rounded{ font-size:1.15em; }
+.opcion[data-estado="bien"]{ border-color:var(--verde); background:var(--verde-sua); }
+.opcion[data-estado="bien"] .opcion__letra{ background:var(--verde); color:#fff; }
+.opcion[data-estado="mal"]{ border-color:var(--rojo); background:var(--rojo-sua); }
+.opcion[data-estado="mal"] .opcion__letra{ background:var(--rojo); color:#fff; }
+.opcion[disabled]{ cursor:default; }
+
+.cuenta{
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  padding:clamp(10px,2vh,24px); border-radius:var(--r-lg);
+  background:var(--crema-2);
+  font-family:var(--titulo); font-weight:600; color:var(--naranja-txt);
+  font-size:clamp(1.4rem,4.4vh,3.2rem);
+}
+.cuenta em{ font-style:normal; color:var(--tinta); }
+
+/* Retroalimentación */
+.pista{
+  display:flex; gap:clamp(10px,1.4vw,16px); align-items:flex-start;
+  padding:clamp(11px,1.8vh,18px) clamp(13px,1.6vw,20px); border-radius:var(--r-md);
+  font-size:clamp(.85rem,1.95vh,1.2rem); line-height:1.45; animation:surgir .3s both;
+}
+.pista__cara{ flex:none; width:clamp(38px,5.6vh,60px); aspect-ratio:1; object-fit:contain; }
+.pista p{ margin:0; }
+.pista b{ font-weight:800; }
+.pista[data-tipo="bien"]{ background:var(--verde-sua); color:#2f6b45; }
+.pista[data-tipo="pista"]{ background:var(--oro-sua); color:#8a6516; }
+
+/* Llave ganada */
+.llave-premio{
+  display:flex; align-items:center; gap:12px; justify-content:center;
+  padding:clamp(9px,1.5vh,15px); border-radius:var(--r-md);
+  background:var(--oro-sua); font-family:var(--titulo); font-weight:600;
+  font-size:clamp(.9rem,2.1vh,1.35rem); color:var(--tinta);
+  animation:surgir .35s both;
+}
+.llave-premio img{ width:clamp(28px,4.4vh,46px); aspect-ratio:1; animation:brinca .6s ease both; }
+@keyframes brinca{
+  0%{ transform:scale(0) rotate(-40deg) } 60%{ transform:scale(1.25) rotate(8deg) }
+  100%{ transform:scale(1) rotate(0) }
+}
+
+.acciones{
+  display:flex; flex-wrap:wrap; gap:10px; margin-top:auto;
+  padding-top:clamp(6px,1.2vh,12px); flex:none;
+}
+.acciones .btn{ flex:1 1 220px; min-width:0; }
+.acciones .btn{ flex:1; }
+
+/* ---------------- Celebración ---------------- */
+.festejo{
+  min-height:100%; display:grid; align-content:center; justify-items:center;
+  gap:clamp(10px,2vh,24px); text-align:center;
+}
+.festejo__titulo{ margin:0; font-family:var(--titulo); font-weight:600; font-size:clamp(1.3rem,4vh,2.8rem); }
+.festejo__texto{ margin:0; max-width:44ch; font-size:clamp(.9rem,2.1vh,1.35rem); line-height:1.5; }
+.festejo__llaves{ display:flex; gap:clamp(6px,1vw,12px); }
+.festejo__llaves img{ width:clamp(34px,6vh,62px); aspect-ratio:1; animation:brinca .5s both; }
+.festejo__llaves img:nth-child(2){ animation-delay:.1s }
+.festejo__llaves img:nth-child(3){ animation-delay:.2s }
+.festejo__llaves img:nth-child(4){ animation-delay:.3s }
+.festejo__martin{ width:clamp(90px,16vh,180px); }
+
+/* ---------------- Instrucciones ---------------- */
+.bloque{
+  padding:clamp(14px,2.2vh,26px) clamp(15px,2vw,30px); margin-bottom:clamp(10px,1.8vh,18px);
+  border-radius:var(--r-lg); background:var(--papel); box-shadow:var(--sombra);
+}
+.bloque__titulo{
+  margin:0 0 10px; font-family:var(--titulo); font-weight:600; color:var(--naranja-txt);
+  font-size:clamp(1rem,2.4vh,1.5rem);
+}
+.bloque__texto{ margin:0; font-size:clamp(.88rem,2vh,1.2rem); line-height:1.55; }
+
+.iconos-lista{ display:grid; gap:clamp(8px,1.4vh,14px); grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+.icono-fila{ display:flex; gap:13px; align-items:flex-start; }
+.icono-fila__caja{
+  flex:none; display:grid; place-items:center; width:clamp(38px,5.4vh,54px); aspect-ratio:1;
+  border-radius:var(--r-sm); background:var(--naranja-sua); color:var(--naranja-txt);
+}
+.icono-fila__caja .material-symbols-rounded{ font-size:clamp(20px,2.9vh,28px); }
+.icono-fila__caja img{ width:70%; height:70%; object-fit:contain; }
+.icono-fila b{ display:block; font-family:var(--titulo); font-weight:600; font-size:clamp(.85rem,1.9vh,1.1rem); }
+.icono-fila span{ font-size:clamp(.75rem,1.7vh,1rem); color:var(--tinta-2); line-height:1.4; }
+
+.pasos-lista{ display:grid; gap:clamp(8px,1.4vh,14px); }
+.paso-num{ display:flex; gap:13px; align-items:flex-start; }
+.paso-num__n{
+  flex:none; display:grid; place-items:center; width:clamp(30px,4.4vh,42px); aspect-ratio:1;
+  border-radius:50%; background:var(--naranja-btn); color:#fff;
+  font-family:var(--titulo); font-weight:600; font-size:clamp(.85rem,1.9vh,1.1rem);
+}
+.paso-num b{ display:block; font-family:var(--titulo); font-weight:600; font-size:clamp(.88rem,2vh,1.15rem); }
+.paso-num span{ font-size:clamp(.78rem,1.75vh,1rem); line-height:1.45; }
+
+/* ---------------- Instalar ---------------- */
+.instalar{
+  position:fixed; left:14px; right:14px; bottom:calc(14px + var(--inf)); z-index:70;
+  max-width:520px; margin:0 auto; display:flex; align-items:center; gap:11px;
+  padding:13px 15px; border-radius:var(--r-lg); background:var(--papel);
+  border:2px solid var(--naranja); box-shadow:var(--sombra-alta);
+}
+.instalar p{ flex:1; margin:0; font-size:.85rem; font-weight:700; line-height:1.35; }
+
+.confeti{ position:fixed; inset:0; z-index:80; pointer-events:none; overflow:hidden; }
+.confeti span{ position:absolute; width:9px; height:14px; border-radius:2px; animation:caer linear forwards; }
+@keyframes caer{
+  from{ transform:translateY(-10vh) rotate(0); opacity:1 }
+  to{ transform:translateY(110vh) rotate(720deg); opacity:.2 }
+}
+
+/* ============================================================
+   MÓVIL Y TABLET: una sola columna, sin scroll de página
+   ============================================================ */
+@media (max-width:899px){
+  .escena{ grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto; }
+  .escena__ilustracion{ max-height:26vh; }
+  .martin{
+    flex-direction:row; width:100%; justify-content:space-between;
+    align-items:center; gap:10px;
+  }
+  .martin__figura{ width:clamp(60px,16vw,110px); height:auto; flex:none; }
+  .reto{ grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
+  .reto__ilustracion{ max-height:20vh; }
+  .polya-modal{ grid-template-columns:minmax(0,1fr); justify-items:center; }
+  .polya-modal__figura{ width:clamp(130px,30vh,240px); }
+  .globo::after{ left:50%; top:-22px; transform:translateX(-50%); border-right-color:transparent; border-bottom-color:var(--papel); }
+  .cuentos{ grid-template-columns:1fr; }
+  .capitulos{ grid-template-columns:1fr 1fr; }
+  .pasos-tira__item span:not(.material-symbols-rounded){ display:none; }
+}
+
+@media (max-width:640px){
+  .acciones{ flex-direction:column; }
+  .acciones .btn{ flex:1 1 auto; width:100%; }
+}
+
+@media (max-width:520px){
+  .capitulos{ grid-template-columns:1fr; }
+  .cabecera__logo{ height:clamp(38px,7vh,56px); }
+  .pie-fijo__lema{ display:none; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
+
+
+/* ------------------------------------------------------------
+   AÑADIDOS DE ESTA REVISIÓN
+   ------------------------------------------------------------ */
+
+/* Punto 15: el logo de las pantallas internas vuelve a la portada */
+.logo-enlace{ cursor:pointer; transition:transform .18s; }
+.logo-enlace:hover{ transform:scale(1.02); }
+.logo-enlace:active{ transform:scale(.98); }
+
+.titulo-cuento{
+  text-align:center; margin:0 0 6px;
+  font-family:var(--titulo); font-weight:600;
+  font-size:clamp(1.1rem,3vh,2rem);
+}
+
+/* Punto 3: aviso de que ya se puede llamar a Pólya */
+.aviso-polya{
+  display:flex; align-items:center; gap:clamp(10px,1.5vw,18px);
+  margin-top:clamp(12px,2vh,22px);
+  padding:clamp(11px,1.8vh,18px) clamp(13px,1.6vw,22px);
+  border-radius:var(--r-md);
+  background:var(--naranja-sua); border:2px dashed var(--naranja);
+  animation:respira 2.2s ease-in-out infinite;
+}
+.aviso-polya img{ width:clamp(42px,6.4vh,68px); aspect-ratio:1; flex:none; }
+.aviso-polya p{ margin:0; font-size:clamp(.85rem,1.95vh,1.2rem); line-height:1.4; }
+.aviso-polya .material-symbols-rounded{ vertical-align:-.2em; color:var(--naranja-osc); }
+
+/* Punto 8: carrusel de imágenes del cuento */
+.slide{ width:100%; display:grid; place-items:center; }
+.slide img{
+  width:100%; height:auto; max-height:100%; object-fit:contain;
+  animation:aparece .6s ease both;
+}
+.slide-puntos{ display:flex; gap:6px; justify-content:center; padding:8px 0 4px; }
+.slide-puntos i{
+  width:8px; height:8px; border-radius:50%; background:var(--naranja-sua);
+  transition:background .3s, transform .3s;
+}
+.slide-puntos i[data-activo]{ background:var(--naranja); transform:scale(1.35); }
+
+/* Punto 6: la retroalimentación dura y avisa cuándo continúa */
+.pista__cuerpo{ flex:1; min-width:0; display:grid; gap:10px; }
+.pista__seguir{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.pista__barra{
+  flex:1; min-width:120px; height:10px; border-radius:99px;
+  background:rgba(255,255,255,.6); overflow:hidden;
+}
+.pista__barra i{
+  display:block; height:100%; width:0; border-radius:99px;
+  background:var(--naranja); transition:width linear;
+}
+.pista[data-tipo="bien"] .pista__barra i{ background:var(--verde); }
+
+/* Punto 11: Pólya sobre el tesoro al reunir las 20 llaves */
+.tesoro-final{
+  position:relative; width:min(340px,62vw,34vh); margin:0 auto;
+}
+.tesoro-final__cofre{
+  display:block; width:100%; height:auto; margin:0 auto;
+  animation:brillaCofre 1.8s ease-in-out infinite;
+}
+/* La animación del camino incluye translateY(-50%) para centrarse;
+   el cofre del festejo necesita la suya propia o se desplaza. */
+@keyframes brillaCofre{
+  0%,100%{ transform:scale(1) }
+  50%    { transform:scale(1.05) }
+}
+/* Pólya se apoya sobre el cofre */
+.tesoro-final__polya{
+  position:absolute; left:50%; bottom:26%; width:56%;
+  transform-origin:bottom center;
+  animation:saltoAlegre 2.4s ease-in-out infinite;
+}
+@keyframes saltoAlegre{
+  0%,100%{ transform:translate(-50%,0) rotate(-2deg) }
+  50%    { transform:translate(-50%,-14px) rotate(2deg) }
+}
+.festejo__medalla{
+  margin:0; display:inline-flex; align-items:center; gap:8px;
+  padding:9px 18px; border-radius:99px; background:var(--oro-sua);
+  font-size:clamp(.8rem,1.8vh,1.05rem);
+}
+.festejo__medalla .material-symbols-rounded{ color:var(--oro); }
+
+/* El camino cabe también dentro del festejo */
+.festejo .camino{ width:100%; }
+
+.redondo--sonido{ background:var(--crema-2); color:var(--naranja-txt); box-shadow:0 3px 0 #e8d7c6; }
+.redondo--sonido[aria-pressed="true"]{ opacity:.6; }

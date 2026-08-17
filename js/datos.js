@@ -1,0 +1,377 @@
+/* ============================================================
+   Aprendo con Pólya — CONTENIDO
+   Los textos son los originales de la aplicación de 2019,
+   recuperados del SWF. No se han reescrito.
+   ============================================================ */
+
+const APP = {
+  titulo: 'Aprendo con Pólya',
+  lema: 'Me enseña a resolver problemas matemáticos',
+  descripcion:
+    'Aplicación para estudiantes de grado segundo para la introducción ' +
+    'en la resolución de problemas del tipo aditivo.',
+  autoria:
+    'Aplicación educativa elaborada por: Yasmín Raquel Rodríguez Bautista y ' +
+    'María Elena Semanate Álvarez. Para aspirar al título de Magíster en ' +
+    'Gestión de la Tecnología Educativa. Universidad de Santander UDES.',
+  version: '3.0 · PWA'
+};
+
+/* Los cuatro pasos del método, con el enunciado original. */
+const PASOS = [
+  { n: 1, nombre: 'Leo y comprendo el problema', icono: 'search', corto: 'Leo',
+    detalle: '¿Qué sé del problema? ¿Qué me preguntan? ¡Saco los DATOS RELEVANTES!',
+    guia: 'Busca en el problema los dos números que sí importan. No todos los números sirven.' },
+  { n: 2, nombre: 'Pienso un plan', icono: 'lightbulb', corto: 'Planeo',
+    detalle: '¿Qué operación realizo para responder la pregunta?',
+    guia: '¿Hay que juntar los números o hay que quitar uno del otro?' },
+  { n: 3, nombre: 'Ejecuto el plan', icono: 'calculate', corto: 'Resuelvo',
+    detalle: '¡Realizo la operación!',
+    guia: 'Haz la cuenta con calma y elige la respuesta correcta.' },
+  { n: 4, nombre: 'Vuelvo atrás', icono: 'fact_check', corto: 'Reviso',
+    detalle: 'Reviso los datos y doy la respuesta',
+    guia: 'Comprueba que tu respuesta responde de verdad la pregunta.' }
+];
+
+/* ------------------------------------------------------------
+   INSTRUCCIONES. Pantalla "Conoce cómo usar la herramienta".
+   Explica el objetivo, los iconos y el recorrido completo.
+   ------------------------------------------------------------ */
+const INSTRUCCIONES = {
+  objetivo: {
+    titulo: '¿De qué se trata?',
+    texto: 'Vas a recorrer dos cuentos junto a Martín. En cada parte del ' +
+           'cuento aparece un problema de matemáticas. El profesor Pólya te ' +
+           'enseña cuatro pasos para resolverlo, y por cada paso que superes ' +
+           'ganas una llave. Reúne las 20 llaves de un cuento y abrirás el tesoro.'
+  },
+  /* Iconografía. Elegida para que cada símbolo sea reconocible por sí solo
+     y pueda reutilizarse en las fichas impresas de clase. */
+  iconos: [
+    { icono:'play_arrow',   nombre:'Iniciar',        texto:'Empieza la aventura desde la portada.' },
+    { icono:'arrow_back',   nombre:'Volver',         texto:'Regresa a la pantalla anterior. Nunca pierdes tu avance.' },
+    { icono:'help',         nombre:'Ayuda',          texto:'Abre estas instrucciones. Al cerrarlas vuelves a donde estabas.' },
+    { icono:'volume_up',    nombre:'Sonido',         texto:'Enciende o apaga la música y las voces.' },
+    { icono:'vpn_key',      nombre:'Llaves',         texto:'Cuenta las llaves ganadas. Están arriba a la derecha.' },
+    { icono:'fast_rewind',  nombre:'Volver a oír',   texto:'Escucha otra vez la parte anterior del cuento.' },
+    { icono:'play_arrow',   nombre:'Escuchar',       texto:'Martín lee el cuento y las imágenes van cambiando. Tócalo otra vez para pausar.' },
+    { icono:'fast_forward', nombre:'Continuar',      texto:'Pasa a la siguiente parte de la narración.' },
+    { icono:'psychology',   nombre:'Llamar a Pólya', texto:'Se enciende y late cuando termina el cuento. Tócalo y el profesor viene a ayudarte.' },
+    { icono:'search',       nombre:'Paso 1: Leo',    texto:'Busco los datos que sí importan en el problema.' },
+    { icono:'lightbulb',    nombre:'Paso 2: Planeo', texto:'Decido qué operación voy a hacer.' },
+    { icono:'calculate',    nombre:'Paso 3: Resuelvo', texto:'Hago la cuenta y elijo la respuesta.' },
+    { icono:'fact_check',   nombre:'Paso 4: Reviso', texto:'Compruebo que mi respuesta responde la pregunta.' },
+    { icono:'inventory_2',  nombre:'Tesoro',         texto:'Está al final del camino. Se abre con las 20 llaves del cuento.' }
+  ],
+  recorrido: [
+    { n: 1, titulo: 'Elige un cuento',   texto: 'Caperucita Roja o El Patito Feo. Puedes cambiar cuando quieras.' },
+    { n: 2, titulo: 'Elige un capítulo', texto: 'Cada cuento tiene cinco capítulos. Se desbloquean uno tras otro.' },
+    { n: 3, titulo: 'Escucha el cuento', texto: 'Martín narra la historia y las imágenes van cambiando.' },
+    { n: 4, titulo: 'Llama a Pólya',     texto: 'Cuando termine el cuento, toca el botón que se enciende.' },
+    { n: 5, titulo: 'Resuelve en cuatro pasos', texto: 'Leo, planeo, resuelvo y reviso. Cada paso te da una llave.' },
+    { n: 6, titulo: 'Avanza al tesoro',  texto: 'Mira cómo tu personaje se acerca al cofre con cada llave.' }
+  ],
+  consejo: 'Si te equivocas no pasa nada: Pólya te explica en qué fijarte y ' +
+           'puedes intentarlo otra vez. Equivocarse también es aprender.'
+};
+
+const AYUDA = {
+  intro: 'Bienvenido al menú de ayuda, aquí encontrarás la información ' +
+         'necesaria para poder navegar sobre esta aplicación.',
+  items: [
+    { icono: '📖', texto: 'Elige uno de los dos cuentos para empezar a resolver problemas.' },
+    { icono: '🔢', texto: 'Cada cuento tiene cinco escenas con un problema para resolver.' },
+    { icono: '🧠', texto: 'Pólya te acompaña en los cuatro pasos: leer, planear, resolver y revisar.' },
+    { icono: '⭐', texto: 'Ganas estrellas cuando resuelves un problema. ¡Consíguelas todas!' },
+    { icono: '🔊', texto: 'Toca el altavoz para escuchar el cuento narrado.' },
+    { icono: '📶', texto: 'La aplicación funciona sin internet una vez instalada.' }
+  ]
+};
+
+const SELECTOR_INTRO_NUEVO =
+  'Selecciona un cuento, resuelve problemas y gana llaves para abrir el tesoro.';
+
+const SELECTOR_INTRO =
+  'Selecciona el cuento que quieres ver y con la ayuda de Pólya resuelve ' +
+  'los problemas que se les presentan a nuestros lindos personajes.';
+
+/* ------------------------------------------------------------
+   DIAPOSITIVAS
+   Cada capítulo tiene una secuencia de imágenes que van cambiando
+   mientras Martín narra. `seg` son los segundos que dura cada una.
+   AJUSTA ESOS SEGUNDOS para sincronizar con tu grabación de voz:
+   la suma de un bloque debe coincidir con la duración del audio.
+   Mientras no haya imágenes definitivas, todas apuntan a los
+   marcadores de posición entregados.
+   ------------------------------------------------------------ */
+const SLIDES_POR_DEFECTO = {
+  narracion: [
+    { img: 'assets/img/para_cuento.webp',    seg: 11 },
+    { img: 'assets/img/portada_cuento.webp', seg: 10 }
+  ],
+  problema: [
+    { img: 'assets/img/portada_cuento.webp', seg: 9 },
+    { img: 'assets/img/para_cuento.webp',    seg: 9 }
+  ]
+};
+
+/* ------------------------------------------------------------
+   CUENTOS. Campos por escena:
+     narracion / problema / opciones  → textos originales
+     datos      → los dos números del problema (para el paso 1)
+     operacion  → 'suma' | 'resta'    (para el paso 2)
+     cuenta     → la operación escrita (para el paso 3)
+     correcta   → índice de la opción correcta
+   ------------------------------------------------------------ */
+const CUENTOS = [
+  {
+    id: 'caperucita',
+    titulo: 'Caperucita Roja',
+    tituloLargo: 'El cumpleaños de Caperucita Roja',
+    portada: 'assets/img/portada_cuento.webp',
+    acento: '#c46bd6',
+    escenas: [
+      {
+        martinIntro: 'Llegamos a la casa de Caperucita, y hoy hay fiesta.',
+        martinAnte: 'Caperucita encontró dos bolsas de globos y quedó pensando.',
+        titulo: 'Hoy hay fiesta.',
+        n: 1, rotulo: 'El arco de globos', arte: 'assets/img/para_cuento.webp',
+        narracion: 'Como ya sabemos, Caperucita Roja era una adorable niña a quien su abuelita amaba muchísimo. Cuando cumplió los siete años le hizo una hermosa fiesta, adornó la sala con serpentinas de colores, en la mesa había una deliciosa torta y sobre ella un hermoso arco de globos elaborado con sus dos colores favoritos.',
+        problema: 'Estando allí, Caperucita halló dos bolsas y le llamó la atención que en una bolsa decía: 25 globos rojos y en la otra bolsa, 12 globos azules color cielo. Se preguntó: ¿con cuántos globos hicieron el arco?',
+        pregunta: '¿Con cuántos globos hicieron el arco?',
+        datos: [{ v: 25, e: 'globos rojos' }, { v: 12, e: 'globos azules' }],
+        distractores: [
+          { v: 2, e: 'bolsas de globos', tipo: 'otro' },
+          { v: 37, e: 'globos en total', tipo: 'resultado' },
+        ],
+        operacion: 'suma', cuenta: '25 + 12', resultado: 37,
+        opciones: ['El arco fue hecho con 37 globos', 'El arco fue hecho con 25 globos'],
+        correcta: 0
+      },
+      {
+        martinIntro: 'Para una fiesta hay que invitar a los amigos.',
+        martinAnte: 'La abuelita compró tarjetas, pero ¿cuántas en total?',
+        titulo: 'Hay que invitar a los amigos.',
+        n: 2, rotulo: 'Las tarjetas', arte: 'assets/img/para_cuento.webp',
+        narracion: 'A la fiesta se invitaron a los mejores amigos de Caperucita, con lindas tarjetas.',
+        problema: 'Para esto la abuelita compró 24 tarjetas de invitación para niños y 25 tarjetas más para niñas. ¿Cuántas tarjetas compró la abuelita?',
+        pregunta: '¿Cuántas tarjetas compró la abuelita?',
+        datos: [{ v: 24, e: 'tarjetas para niños' }, { v: 25, e: 'tarjetas para niñas' }],
+        distractores: [
+          { v: 2, e: 'grupos de amigos', tipo: 'otro' },
+          { v: 49, e: 'tarjetas en total', tipo: 'resultado' },
+        ],
+        operacion: 'suma', cuenta: '24 + 25', resultado: 49,
+        opciones: ['La abuelita compró 94 tarjetas en total', 'La abuelita compró 49 tarjetas en total'],
+        correcta: 1
+      },
+      {
+        martinIntro: 'Ahora toca repartir todas esas tarjetas por el pueblo.',
+        martinAnte: 'La abuelita repartió en la mañana y en la tarde.',
+        titulo: 'A repartir por el pueblo.',
+        n: 3, rotulo: 'La entrega de tarjetas', arte: 'assets/img/para_cuento.webp',
+        narracion: 'Para entregar las tarjetas la abuelita gastó todo un día.',
+        problema: 'En la mañana la abuelita repartió 20 tarjetas y en la tarde 29 tarjetas más. ¿Cuántas tarjetas en total repartió la abuelita?',
+        pregunta: '¿Cuántas tarjetas en total repartió la abuelita?',
+        datos: [{ v: 20, e: 'en la mañana' }, { v: 29, e: 'en la tarde' }],
+        distractores: [
+          { v: 1, e: 'día de reparto', tipo: 'otro' },
+          { v: 49, e: 'tarjetas repartidas', tipo: 'resultado' },
+        ],
+        operacion: 'suma', cuenta: '20 + 29', resultado: 49,
+        opciones: ['La abuelita repartió 49 tarjetas en total', 'La abuelita repartió 39 tarjetas en total'],
+        correcta: 0
+      },
+      {
+        martinIntro: 'Conoce a María, una amiga muy especial de Caperucita.',
+        martinAnte: 'María sacó unas muñecas para regalar y le quedaron otras.',
+        titulo: 'El regalo de María.',
+        n: 4, rotulo: 'María, la amiga de Caperucita', arte: 'assets/img/para_cuento.webp',
+        narracion: '¿Saben? Los padres de María, una amiguita de Caperucita, no tenían dinero para comprar un regalo, así que forraron una caja con un hermoso papel de colores.',
+        problema: 'María sacó 8 muñecas pequeñas para regalar a Caperucita y aún le quedaron 15. ¿Cuántas muñecas tenía María en su colección?',
+        pregunta: '¿Cuántas muñecas tenía María en su colección?',
+        datos: [{ v: 8, e: 'muñecas regaladas' }, { v: 15, e: 'muñecas que quedaron' }],
+        distractores: [
+          { v: 1, e: 'caja de regalo', tipo: 'otro' },
+          { v: 23, e: 'muñecas de la colección', tipo: 'resultado' },
+        ],
+        operacion: 'suma', cuenta: '8 + 15', resultado: 23,
+        opciones: ['María tenía 95 muñecas en su colección', 'María tenía 23 muñecas en su colección'],
+        correcta: 1
+      },
+      {
+        martinIntro: 'Llegó el gran día de la fiesta.',
+        martinAnte: 'Caperucita recordó su primer cumpleaños y comparó los invitados.',
+        titulo: '¡Llegó el gran día!',
+        n: 5, rotulo: 'Colorín colorado', arte: 'assets/img/para_cuento.webp',
+        narracion: 'El día de la fiesta, Caperucita recibió muchos regalos; se divirtieron, comieron torta, dulces y helado, jugaron, saltaron y bailaron animados por un payaso que los hizo reír todo el tiempo. Al finalizar todos se fueron con un regalo sorpresa y un globo rojo para las niñas y azul cielo para los niños.',
+        problema: 'Todo esto me recuerda otra linda fiesta que tuvo Caperucita: cuando cumplió un año asistieron 14 invitados, y cuando cumplió los siete años asistieron 35 más que cuando cumplió un año. ¿Cuántos invitados asistieron a la fiesta de los siete años?',
+        pregunta: '¿Cuántos invitados asistieron a la fiesta de los siete años?',
+        datos: [{ v: 14, e: 'invitados al primer año' }, { v: 35, e: 'invitados más' }],
+        distractores: [
+          { v: 7, e: 'años que cumplió', tipo: 'otro' },
+          { v: 49, e: 'invitados en total', tipo: 'resultado' },
+        ],
+        operacion: 'suma', cuenta: '14 + 35', resultado: 49,
+        opciones: ['A la fiesta de los 7 años asistieron 49 invitados', 'A la fiesta de los 7 años asistieron 21 invitados'],
+        correcta: 0,
+        cierre: '¡Colorín colorado, este cuento se ha acabado!'
+      }
+    ]
+  },
+  {
+    id: 'patito',
+    titulo: 'El Patito Feo',
+    tituloLargo: 'El nacimiento del Patito Feo',
+    portada: 'assets/img/portada_cuento.webp',
+    acento: '#37a0b3',
+    escenas: [
+      {
+        martinIntro: 'Cambiamos de cuento: estamos en la granja de don Ramón.',
+        martinAnte: 'Empezaron a nacer los patitos, pero no todos los huevos se abrieron.',
+        titulo: 'En la granja de don Ramón.',
+        n: 1, rotulo: '10 lindos patitos', arte: 'assets/img/para_cuento.webp',
+        narracion: 'En la granja de don Ramón, la señora pata empolló sus huevos con mucha paciencia hasta que empezaron a nacer los primeros patitos.',
+        problema: 'De 26 huevos empollados nacieron 10 lindos paticos. ¿Cuántos huevos faltan por romper? Se preguntó don Ramón.',
+        pregunta: '¿Cuántos huevos faltan por romper?',
+        datos: [{ v: 26, e: 'huevos empollados' }, { v: 10, e: 'paticos nacidos' }],
+        distractores: [
+          { v: 1, e: 'señora pata', tipo: 'otro' },
+          { v: 16, e: 'huevos sin romper', tipo: 'resultado' },
+        ],
+        operacion: 'resta', cuenta: '26 − 10', resultado: 16,
+        opciones: ['Faltan por romper 36 huevos', 'Faltan por romper 16 huevos'],
+        correcta: 1
+      },
+      {
+        martinIntro: 'Don Ramón ama los números y no para de hacer cuentas.',
+        martinAnte: 'Papá pato y mamá pata cuidan grupos distintos de paticos.',
+        titulo: 'Don Ramón hace cuentas.',
+        n: 2, rotulo: 'Más paticos', arte: 'assets/img/para_cuento.webp',
+        narracion: 'Los paticos llenaban de felicidad a los papás, a sus amigos y a don Ramón. Y con paciencia esperaban que todos nacieran. Como don Ramón amaba los números, hacía sus cuentas para distraerse un poco, y observó que:',
+        problema: 'Papá pato cuidaba a los 10 paticos nacidos y a mamá pata le nacieron otros 4 paticos. ¿Cuántos paticos más tiene el pato que mamá pata? Nuevamente se preguntaba don Ramón.',
+        pregunta: '¿Cuántos paticos más tiene papá pato que mamá pata?',
+        datos: [{ v: 10, e: 'paticos de papá pato' }, { v: 4, e: 'paticos de mamá pata' }],
+        distractores: [
+          { v: 2, e: 'nidos en la granja', tipo: 'otro' },
+          { v: 6, e: 'paticos de diferencia', tipo: 'resultado' },
+        ],
+        operacion: 'resta', cuenta: '10 − 4', resultado: 6,
+        opciones: ['Papá pato tiene 14 paticos más que mamá pata', 'Papá pato tiene 6 paticos más que mamá pata'],
+        correcta: 1
+      },
+      {
+        martinIntro: 'Pasó el tiempo y siguieron naciendo más paticos.',
+        martinAnte: 'Ahora mamá pata cuida más paticos que papá pato.',
+        titulo: 'Siguen naciendo paticos.',
+        n: 3, rotulo: 'Otros paticos', arte: 'assets/img/para_cuento.webp',
+        narracion: 'Al cabo de un corto tiempo nació otro y luego otro y así sucesivamente.',
+        problema: 'Mamá pata ya cuidaba de 13 paticos y papá pato seguía con sus 10 paticos. ¿Cuántos paticos menos tiene papá pato que mamá pata? Se preguntaba don Ramón.',
+        pregunta: '¿Cuántos paticos menos tiene papá pato que mamá pata?',
+        datos: [{ v: 13, e: 'paticos de mamá pata' }, { v: 10, e: 'paticos de papá pato' }],
+        distractores: [
+          { v: 2, e: 'papás pato', tipo: 'otro' },
+          { v: 3, e: 'paticos de diferencia', tipo: 'resultado' },
+        ],
+        operacion: 'resta', cuenta: '13 − 10', resultado: 3,
+        opciones: ['Papá pato tiene 3 paticos menos que mamá pata', 'Papá pato tiene 23 paticos menos que mamá pata'],
+        correcta: 0
+      },
+      {
+        martinIntro: 'Entre cascarones rotos, don Ramón sigue contando.',
+        martinAnte: 'Quiere saber la diferencia entre los huevos y los paticos.',
+        titulo: 'Entre cascarones rotos.',
+        n: 4, rotulo: '23 paticos', arte: 'assets/img/para_cuento.webp',
+        narracion: 'Entre cascarones rotos y vacíos don Ramón seguía haciendo sus cuentas.',
+        problema: 'La señora pata calentó 26 huevos y han nacido 23. ¿Qué diferencia hay entre el número de huevos que tenía al inicio y el número de huevos que ya han reventado?',
+        pregunta: '¿Qué diferencia hay entre los huevos del inicio y los que ya reventaron?',
+        datos: [{ v: 26, e: 'huevos calentados' }, { v: 23, e: 'paticos nacidos' }],
+        distractores: [
+          { v: 1, e: 'señora pata', tipo: 'otro' },
+          { v: 3, e: 'huevos sin abrir', tipo: 'resultado' },
+        ],
+        operacion: 'resta', cuenta: '26 − 23', resultado: 3,
+        opciones: ['La diferencia entre el número de huevos es 3', 'La diferencia entre el número de huevos es 49'],
+        correcta: 0
+      },
+      {
+        martinIntro: 'Queda un último huevo, y es el más grande de todos.',
+        martinAnte: 'De todos los huevos, solo uno seguía sin abrirse.',
+        titulo: 'Queda un huevo grande.',
+        n: 5, rotulo: 'Un huevo grande', arte: 'assets/img/para_cuento.webp',
+        narracion: 'Todos los animales de la granja estaban muy contentos y celebraban junto con los padres y don Ramón semejante acontecimiento, pero no se habían dado cuenta que:',
+        problema: 'De los 26 huevos, 1 —el más grande de todos— aún permanecía intacto. ¿Cuántos huevos eran pequeños?',
+        pregunta: '¿Cuántos huevos eran pequeños?',
+        datos: [{ v: 26, e: 'huevos en total' }, { v: 1, e: 'huevo grande' }],
+        distractores: [
+          { v: 2, e: 'papás pato', tipo: 'otro' },
+          { v: 25, e: 'huevos pequeños', tipo: 'resultado' },
+        ],
+        operacion: 'resta', cuenta: '26 − 1', resultado: 25,
+        opciones: ['27 huevos eran pequeños', '25 huevos eran pequeños'],
+        correcta: 1,
+        cierre: 'Y todos, incluso los patitos recién nacidos, concentraron su atención en el huevo, a ver cuándo se rompería. Al cabo de algunos minutos, el huevo empezó a moverse y luego se pudo ver el pico, luego el cuerpo y las patas del sonriente pato. Era el más grande y, para sorpresa de todos, ¡muy distinto de los demás! Y colorín colorado, ¡todos quedaron admirados!'
+      }
+    ]
+  }
+];
+
+/* ------------------------------------------------------------
+   GUION DE LOS PERSONAJES (texto nuevo, no del original).
+   Martín narra y acompaña; Pólya asesora sobre el método.
+   Los textos originales del cuento no se tocan: viven en
+   `narracion`, `problema` y `opciones`.
+   ------------------------------------------------------------ */
+const MARTIN = {
+  saludo: '¡Hola! Soy Martín. Te voy a acompañar en esta aventura. ' +
+          'Vamos a viajar por dos cuentos y a resolver los problemas que ' +
+          'aparezcan en el camino. ¿Empezamos?',
+  antesCuento: 'Escucha con atención, que aquí empieza la historia.',
+  antesProblema: 'Aquí es donde necesitamos tu ayuda. Mira bien lo que pasó.',
+  llamaPolya: 'Este problema está difícil… ¡Llamemos al profesor Pólya!',
+  volverMapa: 'Sigamos el camino, nos falta una parte del cuento.',
+  finCuento: '¡Lo lograste! Terminamos este cuento completo.'
+};
+
+const POLYA_ASESOR = {
+  presentacion: 'Mucho gusto, yo soy George Pólya. Todo problema de ' +
+                'matemáticas se puede resolver si sigues cuatro pasos ' +
+                'siempre en el mismo orden. Te los voy a enseñar.',
+  cierre: 'Recuerda: nunca empieces por la cuenta. Primero se entiende, ' +
+          'después se planea, y solo entonces se calcula. ¿Listo?',
+  pasoEntra: {
+    1: 'Primero vamos a entender. Busca en el problema los dos números que sí importan.',
+    2: 'Ya tenemos los datos. Ahora piensa: ¿hay que juntarlos o hay que quitarlos?',
+    3: 'Tenemos el plan. Ahora sí, haz la cuenta con calma.',
+    4: 'Nunca entregues sin revisar. Comprueba que tu respuesta responde la pregunta.'
+  }
+};
+
+/* Voces recuperadas del SWF original. */
+const VOCES_COMPLETAS = {
+  narracion: 'assets/audio/voces/voz_0787.mp3',
+  polya: 'assets/audio/voces/voz_0850.mp3',
+  narrador: 'assets/audio/voces/voz_0068.mp3'
+};
+
+/* Asignación segmento → escena. Usa herramienta-voces.html del proyecto
+   anterior para completarlo; mientras esté vacío se usa la pista completa. */
+const VOCES = {};
+
+/* Cada parte del cuento tiene 4 pasos y cada paso da 1 llave:
+   4 pasos × 5 partes = 20 llaves por cuento. */
+const LLAVES_POR_PARTE = 4;
+const LLAVES_POR_CUENTO = 20;
+
+const MEDALLAS = [
+  { id: 'primera',   icono: 'vpn_key',    nombre: 'Primera llave',   desc: 'Ganaste tu primera llave' },
+  { id: 'caperucita',icono: 'cake',       nombre: 'Tesoro de la fiesta', desc: 'Abriste el tesoro de Caperucita Roja' },
+  { id: 'patito',    icono: 'egg',        nombre: 'Tesoro de la granja', desc: 'Abriste el tesoro de El Patito Feo' },
+  { id: 'perfecto',  icono: 'stars',     nombre: 'Puntería',        desc: 'Resolviste un capítulo completo sin fallar' },
+  { id: 'maestro',   icono: 'workspace_premium', nombre: 'Maestro Pólya', desc: 'Reuniste las 40 llaves de los dos cuentos' }
+];
+
+window.DATOS = { APP, PASOS, AYUDA, INSTRUCCIONES, SELECTOR_INTRO, SELECTOR_INTRO_NUEVO, CUENTOS, VOCES,
+                 SLIDES_POR_DEFECTO,
+                 VOCES_COMPLETAS, MEDALLAS, MARTIN, POLYA_ASESOR,
+                 LLAVES_POR_PARTE, LLAVES_POR_CUENTO };
