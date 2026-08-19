@@ -943,24 +943,36 @@ if ('serviceWorker' in navigator){
    entra la portada y Martín da la bienvenida.
    ============================================================ */
 function arrancar(){
-  var splash  = document.getElementById('splash');
-  var barra   = document.getElementById('splashBarra');
+  var splash = document.getElementById('splash');
+  var barra  = document.getElementById('splashBarra');
 
-  /* Lo que conviene tener listo antes de empezar */
+  /* Cuánto dura como mínimo la pantalla de carga, en milisegundos.
+     4000 = 4 segundos. Súbelo o bájalo a gusto. */
+  var DURACION_MINIMA = 4000;
+
+  /* Tope absoluto: pase lo que pase, a los 12 s se entra igual. */
+  var TOPE = 12000;
+
   var recursos = [ IMG+'logo.webp', IMG+'martin.webp', IMG+'polya.webp',
                    IMG+'tesoro.webp', IMG+'cofre_abierto.webp',
                    IMG+'avance-llamada.webp', IMG+'background.webp' ];
   D.CUENTOS.forEach(function(c){
-    recursos.push(c.portada);
+    if (c.portada) recursos.push(c.portada);
     c.escenas.forEach(function(e){ if (e.arte) recursos.push(e.arte); });
   });
 
   var listos = 0, total = recursos.length, terminado = false;
-  function avanzar(){
-    listos++;
-    if (barra) barra.style.width = Math.round(listos/total*100) + '%';
-    if (listos >= total) entrar();
-  }
+  var inicio = Date.now();
+
+  /* Se cuenta igual si la imagen carga o si falla: lo que importa es
+     que el intento terminó. Si una imagen faltara, la carga no se
+     queda colgada. */
+  recursos.forEach(function(ruta){
+    var img = new Image();
+    img.onload = img.onerror = function(){ listos++; };
+    img.src = ruta;
+  });
+
   function entrar(){
     if (terminado) return;
     terminado = true;
@@ -969,7 +981,6 @@ function arrancar(){
       if (splash) splash.dataset.listo = '1';
       verPortada();
       SND.iniciarMusica();
-      /* Bienvenida de Martín, si su archivo existe */
       if (SND.activo && D.VOCES_COMPLETAS.bienvenida){
         setTimeout(function(){
           SND.reproducirVoz(D.VOCES_COMPLETAS.bienvenida);
@@ -978,13 +989,21 @@ function arrancar(){
     }, 350);
   }
 
-  recursos.forEach(function(r){
-    var img = new Image();
-    img.onload = img.onerror = avanzar;
-    img.src = r;
-  });
-  /* Red de seguridad: la carga nunca se queda colgada */
-  setTimeout(entrar, 6000);
+  /* La barra avanza por tiempo, y espera a las imágenes solo si van
+     más lentas. Nunca marca 100 % antes de que todo esté listo. */
+  (function pintar(){
+    if (terminado) return;
+    var transcurrido = Date.now() - inicio;
+    var porTiempo    = transcurrido / DURACION_MINIMA;
+    var porArchivos  = total ? listos / total : 1;
+    var pct = Math.min(porTiempo, porArchivos, 1);
+
+    if (transcurrido >= TOPE) pct = 1;          // red de seguridad
+    if (barra) barra.style.width = (pct*100).toFixed(1) + '%';
+
+    if (pct >= 1) entrar();
+    else requestAnimationFrame(pintar);
+  })();
 }
 
 arrancar();

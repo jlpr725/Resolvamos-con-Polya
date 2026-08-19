@@ -1044,7 +1044,7 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .splash__barra i{
   display:block; height:100%; width:0; border-radius:99px;
   background:linear-gradient(90deg,var(--naranja-cl),var(--naranja));
-  transition:width .3s ease;
+  /* Sin transición: la barra ya se actualiza en cada fotograma */
 }
 .splash__texto{
   margin:0; font-family:var(--titulo); font-weight:600;

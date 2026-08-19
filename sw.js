@@ -1,5 +1,5 @@
 /* Service worker: la app funciona sin internet una vez instalada. */
-const CACHE = 'polya-v13';
+const CACHE = 'polya-v14';
 
 const ESENCIALES = [
   './', './index.html',
