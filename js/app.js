@@ -52,11 +52,21 @@ var SND = window.SONIDO;
 var pitido = function (t) { SND.pitido(t); };
 
 SND.alCambiarEstado = function () {
+  var sonando = SND.hablando();
   var b = document.getElementById('btnPlay');
   if (b) {
     var i = b.querySelector('.material-symbols-rounded');
-    if (i) i.textContent = SND.hablando() ? 'pause' : 'play_arrow';
+    if (i) i.textContent = sonando ? 'pause' : 'play_arrow';
+    b.setAttribute('aria-label', sonando ? 'Pausar la narración' : 'Escuchar la narración');
   }
+  var ia = document.getElementById('iconoVozAyuda');
+  if (ia) ia.textContent = sonando ? 'pause' : 'play_arrow';
+  var ta = document.getElementById('textoVozAyuda');
+  if (ta) ta.textContent = sonando ? 'Pausar' : 'Escuchar a Martín';
+  var ip = document.getElementById('iconoOirPolya');
+  if (ip) ip.textContent = sonando ? 'pause' : 'play_arrow';
+  var tp = document.getElementById('textoOirPolya');
+  if (tp) tp.textContent = sonando ? 'Pausar' : 'Escuchar';
   var s = document.getElementById('btnSonido');
   if (s) {
     s.querySelector('.material-symbols-rounded').textContent =
@@ -67,9 +77,10 @@ SND.alCambiarEstado = function () {
 };
 
 function rutaVoz(tipo){
-  var k = est.cuento+':'+est.parte+':'+tipo;
-  return D.VOCES[k] || D.VOCES_COMPLETAS.narracion;
+  return D.VOCES[est.cuento+':'+est.parte+':'+tipo] || D.VOCES_COMPLETAS.narracion;
 }
+/* El bloque actual: 0 = la historia, 1 = el problema. */
+function tipoBloque(){ return est.bloque === 0 ? 'narracion' : 'problema'; }
 
 function confeti(){
   var cols=['#e06b38','#f5b731','#4f9d69','#d94f4f','#5b8fd4'];
@@ -130,13 +141,7 @@ function programarSlide(ms){
 function mostrarSlide(){
   var caja = document.getElementById('lienzoSlide');
   if (!caja || !slider) return;
-  var s = slider.lista[slider.i];
-  caja.innerHTML = '<img src="'+s.img+'" alt="">';
-  var ps = document.getElementById('slidePuntos');
-  if (ps) {
-    ps.innerHTML = slider.lista.map(function(_,i){
-      return '<i'+(i===slider.i?' data-activo="1"':'')+'></i>'; }).join('');
-  }
+  caja.innerHTML = '<img src="'+slider.lista[slider.i].img+'" alt="">';
 }
 
 function arrancarSlider(lista, autoplay){
@@ -148,18 +153,60 @@ function arrancarSlider(lista, autoplay){
 
 /* La narración manda: al reproducir corre el carrusel, al pausar se detiene. */
 function alternarNarracion(){
-  if (SND.hablando()){ SND.pausarVoz(); pausarSlider(); return; }
-  if (SND.voz){ SND.reanudarVoz(); seguirSlider(); return; }
+  if (SND.hablando()){ SND.pausarVoz(); pausarSlider(); pararAutoScroll(); return; }
+  if (SND.voz){ SND.reanudarVoz(); seguirSlider(); arrancarAutoScroll(); return; }
   var e = parteActual(); if (!e) return;
-  var tipo = est.bloque === 0 ? 'narracion' : 'problema';
+  var tipo = tipoBloque();
   arrancarSlider(slidesDe(e, tipo), true);
-  SND.reproducirVoz(rutaVoz('narracion'), function(){ pausarSlider(); });
+  arrancarAutoScroll();
+  SND.reproducirVoz(rutaVoz(tipo), function(){ pausarSlider(); pararAutoScroll(); });
 }
 
 function alternarVozSimple(ruta){
   if (SND.hablando()) return SND.pausarVoz();
   if (SND.voz) return SND.reanudarVoz();
   SND.reproducirVoz(ruta);
+}
+
+/* ============================================================
+   DESPLAZAMIENTO AUTOMÁTICO DEL TEXTO (móvil)
+   Cuando el cuento no cabe en pantalla, baja solo mientras
+   Martín narra, para que el niño no tenga que arrastrar.
+   Se detiene si el niño toca el texto, y sigue al soltarlo.
+   VELOCIDAD: píxeles por segundo. Súbelo si va lento,
+   bájalo si va rápido.
+   ============================================================ */
+var VELOCIDAD_TEXTO = 14;      // px por segundo
+var ESPERA_INICIAL   = 2500;   // ms antes de empezar a bajar
+
+var autoScroll = { id:null, caja:null, manual:false };
+
+function pararAutoScroll(){
+  if (autoScroll.id) cancelAnimationFrame(autoScroll.id);
+  autoScroll.id = null;
+}
+
+function arrancarAutoScroll(){
+  pararAutoScroll();
+  var caja = document.getElementById('textoCuento');
+  if (!caja) return;
+  if (caja.scrollHeight <= caja.clientHeight + 4) return;   // cabe entero
+  autoScroll.caja = caja;
+  autoScroll.manual = false;
+
+  caja.addEventListener('pointerdown', function(){ autoScroll.manual = true; });
+
+  var inicio = performance.now() + ESPERA_INICIAL;
+  var base = caja.scrollTop;
+  (function paso(t){
+    if (!document.getElementById('textoCuento')) return;
+    if (!autoScroll.manual && t > inicio){
+      var avance = (t - inicio) / 1000 * VELOCIDAD_TEXTO;
+      caja.scrollTop = base + avance;
+      if (caja.scrollTop + caja.clientHeight >= caja.scrollHeight - 2) return;
+    }
+    autoScroll.id = requestAnimationFrame(paso);
+  })(performance.now());
 }
 
 /* ---------------- Chrome de la pantalla ---------------- */
@@ -189,28 +236,26 @@ function pintar(html){
    1. PORTADA
    ============================================================ */
 function verPortada(){
-  SND.pararVoz(); pararSlider(); est.pantalla='portada'; est.cuento=null;
+  SND.pararVoz(); pararSlider(); pararAutoScroll(); est.pantalla='portada'; est.cuento=null;
   chrome({ musicaFuerte:true });
   SND.iniciarMusica();
   pintar(
     '<div class="portada">' +
-      '<div class="portada__orbita">' +
-        
-        '<img class="portada__logo" src="'+IMG+'logo.webp" alt="Resolvamos con Pólya">' +
-      '</div>' +
+      '<img class="portada__logo" src="'+IMG+'logo.webp" alt="Resolvamos con Pólya">' +
       '<p class="portada__desc">'+esc(D.APP.descripcion)+'</p>' +
       '<button class="btn btn--grande" data-ir="cuentos">'+icono('play_arrow')+' Iniciar</button>' +
       '<button class="enlace" data-ir="instrucciones">' +
-        '<span class="enlace__i">'+icono('question_mark')+'</span> Conoce cómo usar la herramienta</button>' +
-      '<p class="portada__creditos">'+esc(D.APP.autoria)+'</p>' +
-    '</div>');
+        '<span class="enlace__i">'+icono('help')+'</span> Conoce cómo usar la herramienta</button>' +
+    '</div>' +
+    '<p class="portada__creditos">'+esc(D.APP.autoria)+'</p>');
 }
 
 /* ============================================================
    2. INSTRUCCIONES
    ============================================================ */
 function verInstrucciones(desde){
-  /* Guarda dónde estaba el usuario para devolverlo al mismo punto. */
+  /* Guarda dónde estaba el usuario: el botón de volver del pie lo devuelve
+     exactamente al mismo punto. */
   if (desde !== false && est.pantalla !== 'instrucciones'){
     var d = JSON.parse(JSON.stringify(est));
     regreso = function(){
@@ -221,16 +266,28 @@ function verInstrucciones(desde){
         case 'capitulos':  return verCapitulos(d.cuento);
         case 'narracion':  return verNarracion();
         case 'reto':       return verPaso();
-        case 'festejo':    return verCapitulos(d.cuento);
         default:           return verPortada();
       }
     };
   }
-  SND.pararVoz(); pararSlider(); est.pantalla='instrucciones';
+  SND.pararVoz(); pararSlider(); pararAutoScroll();
+  est.pantalla='instrucciones';
   chrome({ cabecera:true, logo:true, titulo:'Cómo se usa', pie:true, atras:true, musicaFuerte:true });
   var I = D.INSTRUCCIONES;
 
-  var h = '<div class="bloque">' +
+  /* Punto 12: el saludo de Martín encabeza la pantalla y trae su
+     propio botón de play/pausa. */
+  var h = '<div class="bloque saludo">' +
+      '<img class="saludo__cara" src="'+(D.MARTIN_RETRATO || IMG+'martin.webp')+'" alt="Martín">' +
+      '<div class="saludo__cuerpo">' +
+        '<p class="bloque__texto">'+esc(I.consejo)+'</p>' +
+        '<button class="btn btn--claro btn--audio" id="btnVozAyuda">' +
+          '<span class="material-symbols-rounded" id="iconoVozAyuda">play_arrow</span>' +
+          '<span id="textoVozAyuda">Escuchar a Martín</span></button>' +
+      '</div>' +
+    '</div>';
+
+  h += '<div class="bloque">' +
       '<h2 class="bloque__titulo">'+esc(I.objetivo.titulo)+'</h2>' +
       '<p class="bloque__texto">'+esc(I.objetivo.texto)+'</p></div>';
 
@@ -238,7 +295,8 @@ function verInstrucciones(desde){
        '<div class="pasos-lista">';
   I.recorrido.forEach(function(r){
     h += '<div class="paso-num"><span class="paso-num__n">'+r.n+'</span>' +
-         '<span><b>'+esc(r.titulo)+'</b><span>'+esc(r.texto)+'</span></span></div>';
+         '<span class="paso-num__txt"><b>'+esc(r.titulo)+'</b>' +
+         '<span>'+esc(r.texto)+'</span></span></div>';
   });
   h += '</div></div>';
 
@@ -253,25 +311,38 @@ function verInstrucciones(desde){
       ? '<span class="icono-fila__caja"><img src="'+IMG+'avance-llamada.webp" alt=""></span>'
       : '<span class="icono-fila__caja">'+icono(i.icono)+'</span>';
     h += '<div class="icono-fila">'+caja+
-         '<span><b>'+esc(i.nombre)+'</b><span>'+esc(i.texto)+'</span></span></div>';
+         '<span class="icono-fila__txt"><b>'+esc(i.nombre)+'</b>' +
+         '<span>'+esc(i.texto)+'</span></span></div>';
   });
   h += '</div></div>';
 
-  h += '<div class="bloque" style="display:flex;gap:14px;align-items:center">' +
-       '<img src="'+IMG+'martin.webp" alt="Martín" style="width:clamp(60px,10vh,110px)">' +
-       '<p class="bloque__texto">'+esc(I.consejo)+'</p></div>';
-
-  h += '<div class="acciones"><button class="btn btn--ancho" id="btnVolverDe">' +
-       icono('arrow_back')+' Volver a donde estaba</button></div>';
+  /* Punto 14: en lugar del botón de volver, la firma del autor. */
+  h += '<p class="firma">Powered by ' +
+       '<a href="https://joseloportfolio.netlify.app/" target="_blank" rel="noopener">origen</a></p>';
 
   pintar('<div class="centrado">'+h+'</div>');
+
+  /* La voz de Martín arranca sola al entrar. */
+  if (SND.activo) reproducirVozAyuda();
+}
+
+function reproducirVozAyuda(){
+  SND.reproducirVoz(D.VOCES_COMPLETAS.ayuda || D.VOCES_COMPLETAS.narrador, pintarVozAyuda);
+  pintarVozAyuda();
+}
+function pintarVozAyuda(){
+  var i = document.getElementById('iconoVozAyuda');
+  var t = document.getElementById('textoVozAyuda');
+  var sonando = SND.hablando();
+  if (i) i.textContent = sonando ? 'pause' : 'play_arrow';
+  if (t) t.textContent = sonando ? 'Pausar' : 'Escuchar a Martín';
 }
 
 /* ============================================================
    3. SELECCIÓN DE CUENTO
    ============================================================ */
 function verCuentos(){
-  SND.pararVoz(); pararSlider(); est.pantalla='cuentos'; est.cuento=null;
+  SND.pararVoz(); pararSlider(); pararAutoScroll(); est.pantalla='cuentos'; est.cuento=null;
   chrome({ cabecera:true, logo:true, llaves:true, pie:true, atras:true, musicaFuerte:true });
   cabLogo.hidden = true;
 
@@ -297,7 +368,7 @@ function verCuentos(){
    4. AVANCE DEL CUENTO (capítulos + camino al tesoro)
    ============================================================ */
 function verCapitulos(id, animar){
-  SND.pararVoz(); pararSlider();
+  SND.pararVoz(); pararSlider(); pararAutoScroll();
   est.pantalla='capitulos'; est.cuento=id;
   var c = cuentoPorId(id); if(!c) return verCuentos();
   chrome({ cabecera:true, llaves:true, pie:true, atras:true });
@@ -358,6 +429,8 @@ function verNarracion(){
   var texto = esc(b.texto);
   if (b.destacar) texto = texto.replace(esc(b.destacar), '<b>'+esc(b.destacar)+'</b>');
 
+  /* El aviso de Pólya sale del globo: así el globo se ajusta al texto
+     y el aviso puede colocarse donde estorbe menos. */
   var avisoPolya = ultimo
     ? '<div class="aviso-polya">' +
         '<img src="'+IMG+'avance-llamada.webp" alt="">' +
@@ -366,35 +439,31 @@ function verNarracion(){
       '</div>'
     : '';
 
-  var puntos = '<div class="puntos" id="bloquePuntos">' + bl.map(function(_,i){
-      return '<i'+(i===est.bloque?' data-activo="1"':'')+'></i>'; }).join('') + '</div>';
-
   pintar(
     '<div class="escena">' +
-      '<div class="escena__ilustracion">' +
-        '<div class="slide" id="lienzoSlide"></div>' +
-        '<div class="slide-puntos" id="slidePuntos"></div>' +
-      '</div>' +
-      '<div class="hoja">' +
-        '<h2 class="hoja__titulo">'+esc(b.titulo)+'</h2>' +
-        '<p class="hoja__texto">'+texto+'</p>' +
+      '<div class="escena__ilustracion" id="lienzoSlide"></div>' +
+      '<div class="escena__centro">' +
+        '<div class="globo-cuento">' +
+          '<h2 class="globo-cuento__titulo">'+esc(b.titulo)+'</h2>' +
+          '<div class="globo-cuento__scroll" id="textoCuento">' +
+            '<p class="globo-cuento__texto">'+texto+'</p>' +
+          '</div>' +
+        '</div>' +
         avisoPolya +
       '</div>' +
       '<div class="martin">' +
         '<img class="martin__figura" src="'+IMG+'martin.webp" alt="Martín">' +
-        puntos +
         '<div class="martin__controles">' +
-          '<button class="martin__btn" id="btnPrev" aria-label="Capítulo anterior"'+
+          '<button class="martin__btn" id="btnPrev" aria-label="Parte anterior del cuento"'+
             (est.bloque===0?' disabled':'')+'>'+icono('fast_rewind')+'</button>' +
           '<button class="martin__btn" id="btnPlay" aria-label="Escuchar la narración">'+
             icono('play_arrow')+'</button>' +
-          '<button class="martin__btn" id="btnNext" aria-label="Siguiente"'+
+          '<button class="martin__btn" id="btnNext" aria-label="Siguiente parte"'+
             (ultimo?' disabled':'')+'>'+icono('fast_forward')+'</button>' +
         '</div>' +
       '</div>' +
     '</div>');
 
-  /* El carrusel arranca en pausa: avanza cuando suena la voz. */
   arrancarSlider(slidesDe(e, est.bloque===0 ? 'narracion' : 'problema'), false);
 }
 
@@ -403,14 +472,14 @@ function moverBloque(d){
   var bl = bloquesDe(e);
   var n = est.bloque + d;
   if (n<0 || n>=bl.length) return;
-  SND.pararVoz(); pararSlider(); est.bloque = n; pitido('clic'); verNarracion();
+  SND.pararVoz(); pararSlider(); pararAutoScroll(); est.bloque = n; pitido('clic'); verNarracion();
 }
 
 /* ============================================================
    6. LA APARICIÓN DE PÓLYA
    ============================================================ */
 function abrirPolya(){
-  SND.pararVoz(); pararSlider();
+  SND.pararVoz(); pararSlider(); pararAutoScroll();
   var h = '<div class="polya-modal">' +
     '<img class="polya-modal__figura" src="'+IMG+'polya.webp" alt="Profesor Pólya">' +
     '<div>' +
@@ -422,13 +491,15 @@ function abrirPolya(){
       '</div>';
   });
   h += '<div class="acciones">' +
-      '<button class="btn btn--claro" id="btnOirPolya">'+icono('play_arrow')+' Escuchar</button>' +
-      '<button class="btn" id="btnResolver">Vamos a resolver el problema '+icono('arrow_forward')+'</button>' +
+      '<button class="btn btn--claro" id="btnOirPolya">' +
+        '<span class="material-symbols-rounded" id="iconoOirPolya">play_arrow</span>' +
+        '<span id="textoOirPolya">Escuchar</span></button>' +
+      '<button class="btn" id="btnResolver">Vamos a resolverlo '+icono('arrow_forward')+'</button>' +
     '</div></div></div>';
   modalCaja.innerHTML = h;
   modal.hidden = false;
 }
-function cerrarModal(){ modal.hidden = true; SND.pararVoz(); pararSlider(); }
+function cerrarModal(){ modal.hidden = true; SND.pararVoz(); pararSlider(); pararAutoScroll(); }
 
 /* ============================================================
    7. LA RESOLUCIÓN, PASO A PASO
@@ -443,33 +514,32 @@ function verPaso(){
 
   var tira = '<div class="pasos-tira">' + D.PASOS.map(function(p){
       var a = p.n===est.paso ? ' data-activo="1"' : (p.n<est.paso ? ' data-hecho="1"' : '');
-      return '<div class="pasos-tira__item"'+a+'>'+icono(p.icono)+'<span>'+esc(p.corto)+'</span></div>';
+      return '<div class="pasos-tira__item"'+a+' title="'+esc(p.nombre)+'">' +
+             icono(p.icono)+'<span>'+esc(p.corto)+'</span></div>';
     }).join('') + '</div>';
 
-  var cuerpo = '';
+  /* --- Lo que va DENTRO del panel: solo pasos y enunciado --- */
+  var panel = '', fuera = '';
 
   if (est.paso===1){
+    panel = '<p class="rotulo">El problema</p>' +
+            '<p class="enunciado">'+esc(e.problema)+'</p>';
     var opciones = mezclar(
       e.datos.map(function(d){ return { v:d.v, e:d.e, bueno:1 }; })
         .concat(e.distractores.map(function(d){ return { v:d.v, e:d.e, bueno:0 }; })));
-    var fichas = opciones.map(function(o){
-      return '<button class="ficha" data-num="'+o.v+'" data-bueno="'+o.bueno+'">' +
-             '<b>'+o.v+'</b><span>'+esc(o.e)+'</span></button>';
-    }).join('');
-    cuerpo =
-      '<p class="rotulo">El problema</p>' +
-      '<p class="enunciado">'+esc(e.problema)+'</p>' +
-      '<p class="pregunta">¿Cuáles son los datos que sí importan?</p>' +
-      '<div class="fichas">'+fichas+'</div>';
+    fuera = '<p class="pregunta">¿Cuáles son los datos que sí importan?</p>' +
+      '<div class="fichas">' + opciones.map(function(o){
+        return '<button class="ficha" data-num="'+o.v+'" data-bueno="'+o.bueno+'">' +
+               '<b>'+o.v+'</b><span>'+esc(o.e)+'</span></button>';
+      }).join('') + '</div>';
   }
 
   if (est.paso===2){
-    cuerpo =
-      '<p class="rotulo">La pregunta</p>' +
-      '<p class="pregunta">'+esc(e.pregunta)+'</p>' +
-      '<p class="enunciado">Tus datos: <b>'+e.datos[0].v+'</b> y <b>'+e.datos[1].v+'</b></p>' +
-      '<p class="rotulo">¿Qué operación vas a realizar?</p>' +
-      '<div class="opciones">' +
+    panel = '<p class="rotulo">La pregunta</p>' +
+            '<p class="pregunta">'+esc(e.pregunta)+'</p>' +
+            '<p class="enunciado">Tus datos: <b>'+e.datos[0].v+'</b> y <b>'+e.datos[1].v+'</b></p>';
+    fuera = '<p class="pregunta">¿Qué operación vas a realizar?</p>' +
+      '<div class="opciones opciones--par">' +
         '<button class="opcion" data-plan="suma"><span class="opcion__letra">+</span>' +
           '<span>Juntar los dos números<small>los reúno para saber cuántos hay en total</small></span></button>' +
         '<button class="opcion" data-plan="resta"><span class="opcion__letra">−</span>' +
@@ -478,24 +548,21 @@ function verPaso(){
   }
 
   if (est.paso===3){
-    var ops = e.opciones.map(function(o,k){
-      return '<button class="opcion" data-opcion="'+k+'">' +
-        '<span class="opcion__letra">'+'ab'[k]+'</span><span>'+esc(o)+'</span></button>';
-    }).join('');
-    cuerpo =
-      '<p class="rotulo">Tu plan</p>' +
-      '<div class="cuenta">'+esc(e.cuenta)+' <em>= ?</em></div>' +
-      '<p class="pregunta">'+esc(e.pregunta)+'</p>' +
-      '<div class="opciones">'+ops+'</div>';
+    panel = '<p class="rotulo">Tu plan</p>' +
+            '<div class="cuenta">'+esc(e.cuenta)+' <em>= ?</em></div>';
+    fuera = '<p class="pregunta">'+esc(e.pregunta)+'</p>' +
+      '<div class="opciones opciones--par">' + e.opciones.map(function(o,k){
+        return '<button class="opcion" data-opcion="'+k+'">' +
+          '<span class="opcion__letra">'+'ab'[k]+'</span><span>'+esc(o)+'</span></button>';
+      }).join('') + '</div>';
   }
 
   if (est.paso===4){
-    cuerpo =
-      '<p class="rotulo">Lo que respondiste</p>' +
-      '<div class="cuenta">'+esc(e.cuenta)+' <em>= '+e.resultado+'</em></div>' +
-      '<p class="enunciado">'+esc(e.opciones[e.correcta])+'</p>' +
-      '<p class="pregunta">¿Tu respuesta responde la pregunta?</p>' +
-      '<div class="opciones">' +
+    panel = '<p class="rotulo">Lo que respondiste</p>' +
+            '<div class="cuenta">'+esc(e.cuenta)+' <em>= '+e.resultado+'</em></div>' +
+            '<p class="enunciado">'+esc(e.opciones[e.correcta])+'</p>';
+    fuera = '<p class="pregunta">¿Tu respuesta responde la pregunta?</p>' +
+      '<div class="opciones opciones--par">' +
         '<button class="opcion" data-revisar="1"><span class="opcion__letra">'+icono('check')+'</span>' +
           '<span>Sí, revisé la cuenta y responde la pregunta</span></button>' +
         '<button class="opcion" data-revisar="0"><span class="opcion__letra">'+icono('replay')+'</span>' +
@@ -503,12 +570,15 @@ function verPaso(){
       '</div>';
   }
 
+  /* Punto 10: la ilustración y el enunciado arriba; las opciones y la
+     retroalimentación abajo, fuera del contenedor de texto. */
   pintar(
     '<div class="reto">' +
-      '<div class="reto__lado">' +
+      '<div class="reto__arriba">' +
         '<div class="reto__ilustracion"><img src="'+e.arte+'" alt=""></div>' +
+        '<div class="reto__panel">' + tira + panel + '</div>' +
       '</div>' +
-      '<div class="reto__panel">' + tira + cuerpo +
+      '<div class="reto__abajo">' + fuera +
         '<div id="pista"></div>' +
       '</div>' +
     '</div>');
@@ -614,7 +684,6 @@ function festejar(){
     h += '<h2 class="festejo__titulo">¡Abriste el tesoro!</h2>' +
       '<div class="tesoro-final">' +
         '<img class="tesoro-final__cofre" src="'+IMG+'tesoro.webp" alt="Tesoro abierto">' +
-        '<img class="tesoro-final__polya" src="'+IMG+'polya.webp" alt="Profesor Pólya">' +
       '</div>' +
       '<p class="festejo__texto"><b>¡Reuniste las '+tope+' llaves de '+esc(c.titulo)+'!</b><br>' +
       'Aprendiste a leer con atención, a pensar un plan antes de calcular, a resolver ' +
@@ -653,15 +722,19 @@ function festejar(){
 /* Barra del camino al tesoro, compartida por el festejo y los capítulos. */
 function caminoHTML(llaves, tope, abierto){
   var pct = Math.round(llaves/tope*100);
-  return '<div class="camino">' +
-      '<span class="camino__extremo camino__extremo--ini" id="caminoMartin">' +
-        '<img src="'+IMG+'avance-llamada.webp" alt="Tu avance"></span>' +
-      '<span class="camino__pista">' +
-        '<span class="camino__relleno" data-w="'+pct+'"></span>' +
-        '<span class="camino__cifra">'+llaves+'/'+tope+' llaves</span>' +
-      '</span>' +
-      '<span class="camino__extremo camino__extremo--fin"'+(abierto?' data-abierto="1"':'')+
-        '><img src="'+IMG+'tesoro.webp" alt="Tesoro"></span>' +
+  /* La cifra va encima de la barra: cuando Pólya avanzaba por el
+     centro tapaba el número y no se leía nada. */
+  return '<div class="camino-bloque">' +
+      '<p class="camino__cifra">'+llaves+' de '+tope+' llaves</p>' +
+      '<div class="camino">' +
+        '<span class="camino__extremo camino__extremo--ini" id="caminoMartin">' +
+          '<img src="'+IMG+'avance-llamada.webp" alt="Tu avance"></span>' +
+        '<span class="camino__extremo camino__extremo--fin"'+(abierto?' data-abierto="1"':'')+
+          '><img src="'+IMG+'tesoro.webp" alt="Tesoro"></span>' +
+  '<span class="camino__pista">' +
+          '<span class="camino__relleno" data-w="'+pct+'"></span>' +
+        '</span>' +    
+      '</div>' +
     '</div>';
 }
 
@@ -673,7 +746,10 @@ function animarCamino(){
   var pista = document.querySelector('.camino__pista');
   var rell = document.querySelector('.camino__relleno');
   if (m && pista && rell){
-    m.style.left = Math.round(pista.offsetWidth * Number(rell.dataset.w)/100) + 'px';
+    /* Pólya se mueve dentro de la pista, sin salirse por los extremos. */
+    var recorrido = pista.offsetWidth - m.offsetWidth;
+    var avance = recorrido * Number(rell.dataset.w) / 100;
+    m.style.left = Math.round(pista.offsetLeft + avance) + 'px';
   }
 }
 
@@ -681,7 +757,7 @@ function animarCamino(){
    NAVEGACIÓN
    ============================================================ */
 function atras(){
-  SND.pararVoz(); pararSlider();
+  SND.pararVoz(); pararSlider(); pararAutoScroll();
   switch(est.pantalla){
     case 'instrucciones':
       if (regreso){ var r = regreso; regreso = null; return r(); }
@@ -723,10 +799,10 @@ document.addEventListener('click', function(ev){
   var bs = t.closest('[data-parte-sig]');
   if (bs){ pitido('clic'); return empezarParte(est.cuento, Number(bs.dataset.parteSig)); }
 
-  if (t.closest('#btnVolverDe')){
-    pitido('clic');
-    if (regreso){ var r = regreso; regreso = null; return r(); }
-    return verPortada();
+  if (t.closest('#btnVozAyuda')){
+    if (SND.hablando()){ SND.pausarVoz(); return pintarVozAyuda(); }
+    if (SND.voz){ SND.reanudarVoz(); return pintarVozAyuda(); }
+    return reproducirVozAyuda();
   }
   if (t.closest('#btnSeguir')){
     var cj = document.getElementById('pista');

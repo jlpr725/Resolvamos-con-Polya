@@ -104,15 +104,12 @@ const SELECTOR_INTRO =
    Mientras no haya imágenes definitivas, todas apuntan a los
    marcadores de posición entregados.
    ------------------------------------------------------------ */
+/* Respaldo por si un capítulo no declara sus propias diapositivas.
+   Los diez capítulos ya tienen las suyas, así que esto no se usa;
+   queda como red de seguridad si añades un cuento nuevo. */
 const SLIDES_POR_DEFECTO = {
-  narracion: [
-    { img: 'assets/img/para_cuento.webp',    seg: 11 },
-    { img: 'assets/img/portada_cuento.webp', seg: 10 }
-  ],
-  problema: [
-    { img: 'assets/img/portada_cuento.webp', seg: 9 },
-    { img: 'assets/img/para_cuento.webp',    seg: 9 }
-  ]
+  narracion: [ { img: 'assets/img/logo.webp', seg: 12 } ],
+  problema:  [ { img: 'assets/img/logo.webp', seg: 12 } ]
 };
 
 /* ------------------------------------------------------------
@@ -128,14 +125,19 @@ const CUENTOS = [
     id: 'caperucita',
     titulo: 'Caperucita Roja',
     tituloLargo: 'El cumpleaños de Caperucita Roja',
-    portada: 'assets/img/portada_cuento.webp',
+    portada: 'assets/img/portada_caperucita.webp',
     acento: '#c46bd6',
     escenas: [
       {
         martinIntro: 'Llegamos a la casa de Caperucita, y hoy hay fiesta.',
         martinAnte: 'Caperucita encontró dos bolsas de globos y quedó pensando.',
         titulo: 'Hoy hay fiesta.',
-        n: 1, rotulo: 'El arco de globos', arte: 'assets/img/para_cuento.webp',
+        n: 1, rotulo: 'El arco de globos',
+        arte: 'assets/img/cap1_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/cap1_a.webp', seg: 22 } ],
+          problema:  [ { img: 'assets/img/cap1_b.webp', seg: 15 } ]
+        },
         narracion: 'Como ya sabemos, Caperucita Roja era una adorable niña a quien su abuelita amaba muchísimo. Cuando cumplió los siete años le hizo una hermosa fiesta, adornó la sala con serpentinas de colores, en la mesa había una deliciosa torta y sobre ella un hermoso arco de globos elaborado con sus dos colores favoritos.',
         problema: 'Estando allí, Caperucita halló dos bolsas y le llamó la atención que en una bolsa decía: 25 globos rojos y en la otra bolsa, 12 globos azules color cielo. Se preguntó: ¿con cuántos globos hicieron el arco?',
         pregunta: '¿Con cuántos globos hicieron el arco?',
@@ -152,7 +154,12 @@ const CUENTOS = [
         martinIntro: 'Para una fiesta hay que invitar a los amigos.',
         martinAnte: 'La abuelita compró tarjetas, pero ¿cuántas en total?',
         titulo: 'Hay que invitar a los amigos.',
-        n: 2, rotulo: 'Las tarjetas', arte: 'assets/img/para_cuento.webp',
+        n: 2, rotulo: 'Las tarjetas',
+        arte: 'assets/img/cap2_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/cap2_a.webp', seg: 6 } ],
+          problema:  [ { img: 'assets/img/cap2_b.webp', seg: 10 } ]
+        },
         narracion: 'A la fiesta se invitaron a los mejores amigos de Caperucita, con lindas tarjetas.',
         problema: 'Para esto la abuelita compró 24 tarjetas de invitación para niños y 25 tarjetas más para niñas. ¿Cuántas tarjetas compró la abuelita?',
         pregunta: '¿Cuántas tarjetas compró la abuelita?',
@@ -169,7 +176,12 @@ const CUENTOS = [
         martinIntro: 'Ahora toca repartir todas esas tarjetas por el pueblo.',
         martinAnte: 'La abuelita repartió en la mañana y en la tarde.',
         titulo: 'A repartir por el pueblo.',
-        n: 3, rotulo: 'La entrega de tarjetas', arte: 'assets/img/para_cuento.webp',
+        n: 3, rotulo: 'La entrega de tarjetas',
+        arte: 'assets/img/cap3_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/cap3_a.webp', seg: 6 } ],
+          problema:  [ { img: 'assets/img/cap3_b.webp', seg: 9 } ]
+        },
         narracion: 'Para entregar las tarjetas la abuelita gastó todo un día.',
         problema: 'En la mañana la abuelita repartió 20 tarjetas y en la tarde 29 tarjetas más. ¿Cuántas tarjetas en total repartió la abuelita?',
         pregunta: '¿Cuántas tarjetas en total repartió la abuelita?',
@@ -186,7 +198,12 @@ const CUENTOS = [
         martinIntro: 'Conoce a María, una amiga muy especial de Caperucita.',
         martinAnte: 'María sacó unas muñecas para regalar y le quedaron otras.',
         titulo: 'El regalo de María.',
-        n: 4, rotulo: 'María, la amiga de Caperucita', arte: 'assets/img/para_cuento.webp',
+        n: 4, rotulo: 'María, la amiga de Caperucita',
+        arte: 'assets/img/cap4_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/cap4_a.webp', seg: 11 } ],
+          problema:  [ { img: 'assets/img/cap4_b.webp', seg: 9 } ]
+        },
         narracion: '¿Saben? Los padres de María, una amiguita de Caperucita, no tenían dinero para comprar un regalo, así que forraron una caja con un hermoso papel de colores.',
         problema: 'María sacó 8 muñecas pequeñas para regalar a Caperucita y aún le quedaron 15. ¿Cuántas muñecas tenía María en su colección?',
         pregunta: '¿Cuántas muñecas tenía María en su colección?',
@@ -203,7 +220,12 @@ const CUENTOS = [
         martinIntro: 'Llegó el gran día de la fiesta.',
         martinAnte: 'Caperucita recordó su primer cumpleaños y comparó los invitados.',
         titulo: '¡Llegó el gran día!',
-        n: 5, rotulo: 'Colorín colorado', arte: 'assets/img/para_cuento.webp',
+        n: 5, rotulo: 'Colorín colorado',
+        arte: 'assets/img/cap5_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/cap5_a.webp', seg: 22 } ],
+          problema:  [ { img: 'assets/img/cap5_b.webp', seg: 18 } ]
+        },
         narracion: 'El día de la fiesta, Caperucita recibió muchos regalos; se divirtieron, comieron torta, dulces y helado, jugaron, saltaron y bailaron animados por un payaso que los hizo reír todo el tiempo. Al finalizar todos se fueron con un regalo sorpresa y un globo rojo para las niñas y azul cielo para los niños.',
         problema: 'Todo esto me recuerda otra linda fiesta que tuvo Caperucita: cuando cumplió un año asistieron 14 invitados, y cuando cumplió los siete años asistieron 35 más que cuando cumplió un año. ¿Cuántos invitados asistieron a la fiesta de los siete años?',
         pregunta: '¿Cuántos invitados asistieron a la fiesta de los siete años?',
@@ -223,14 +245,19 @@ const CUENTOS = [
     id: 'patito',
     titulo: 'El Patito Feo',
     tituloLargo: 'El nacimiento del Patito Feo',
-    portada: 'assets/img/portada_cuento.webp',
+    portada: 'assets/img/portada_patito.webp',
     acento: '#37a0b3',
     escenas: [
       {
         martinIntro: 'Cambiamos de cuento: estamos en la granja de don Ramón.',
         martinAnte: 'Empezaron a nacer los patitos, pero no todos los huevos se abrieron.',
         titulo: 'En la granja de don Ramón.',
-        n: 1, rotulo: '10 lindos patitos', arte: 'assets/img/para_cuento.webp',
+        n: 1, rotulo: '10 lindos patitos',
+        arte: 'assets/img/pat1_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/pat1_a.webp', seg: 9 } ],
+          problema:  [ { img: 'assets/img/pat1_b.webp', seg: 8 } ]
+        },
         narracion: 'En la granja de don Ramón, la señora pata empolló sus huevos con mucha paciencia hasta que empezaron a nacer los primeros patitos.',
         problema: 'De 26 huevos empollados nacieron 10 lindos paticos. ¿Cuántos huevos faltan por romper? Se preguntó don Ramón.',
         pregunta: '¿Cuántos huevos faltan por romper?',
@@ -247,7 +274,12 @@ const CUENTOS = [
         martinIntro: 'Don Ramón ama los números y no para de hacer cuentas.',
         martinAnte: 'Papá pato y mamá pata cuidan grupos distintos de paticos.',
         titulo: 'Don Ramón hace cuentas.',
-        n: 2, rotulo: 'Más paticos', arte: 'assets/img/para_cuento.webp',
+        n: 2, rotulo: 'Más paticos',
+        arte: 'assets/img/pat2_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/pat2_a.webp', seg: 15 } ],
+          problema:  [ { img: 'assets/img/pat2_b.webp', seg: 12 } ]
+        },
         narracion: 'Los paticos llenaban de felicidad a los papás, a sus amigos y a don Ramón. Y con paciencia esperaban que todos nacieran. Como don Ramón amaba los números, hacía sus cuentas para distraerse un poco, y observó que:',
         problema: 'Papá pato cuidaba a los 10 paticos nacidos y a mamá pata le nacieron otros 4 paticos. ¿Cuántos paticos más tiene el pato que mamá pata? Nuevamente se preguntaba don Ramón.',
         pregunta: '¿Cuántos paticos más tiene papá pato que mamá pata?',
@@ -264,7 +296,12 @@ const CUENTOS = [
         martinIntro: 'Pasó el tiempo y siguieron naciendo más paticos.',
         martinAnte: 'Ahora mamá pata cuida más paticos que papá pato.',
         titulo: 'Siguen naciendo paticos.',
-        n: 3, rotulo: 'Otros paticos', arte: 'assets/img/para_cuento.webp',
+        n: 3, rotulo: 'Otros paticos',
+        arte: 'assets/img/pat3_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/pat3_a.webp', seg: 6 } ],
+          problema:  [ { img: 'assets/img/pat3_b.webp', seg: 11 } ]
+        },
         narracion: 'Al cabo de un corto tiempo nació otro y luego otro y así sucesivamente.',
         problema: 'Mamá pata ya cuidaba de 13 paticos y papá pato seguía con sus 10 paticos. ¿Cuántos paticos menos tiene papá pato que mamá pata? Se preguntaba don Ramón.',
         pregunta: '¿Cuántos paticos menos tiene papá pato que mamá pata?',
@@ -281,7 +318,12 @@ const CUENTOS = [
         martinIntro: 'Entre cascarones rotos, don Ramón sigue contando.',
         martinAnte: 'Quiere saber la diferencia entre los huevos y los paticos.',
         titulo: 'Entre cascarones rotos.',
-        n: 4, rotulo: '23 paticos', arte: 'assets/img/para_cuento.webp',
+        n: 4, rotulo: '23 paticos',
+        arte: 'assets/img/pat4_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/pat4_a.webp', seg: 6 } ],
+          problema:  [ { img: 'assets/img/pat4_b.webp', seg: 11 } ]
+        },
         narracion: 'Entre cascarones rotos y vacíos don Ramón seguía haciendo sus cuentas.',
         problema: 'La señora pata calentó 26 huevos y han nacido 23. ¿Qué diferencia hay entre el número de huevos que tenía al inicio y el número de huevos que ya han reventado?',
         pregunta: '¿Qué diferencia hay entre los huevos del inicio y los que ya reventaron?',
@@ -298,7 +340,12 @@ const CUENTOS = [
         martinIntro: 'Queda un último huevo, y es el más grande de todos.',
         martinAnte: 'De todos los huevos, solo uno seguía sin abrirse.',
         titulo: 'Queda un huevo grande.',
-        n: 5, rotulo: 'Un huevo grande', arte: 'assets/img/para_cuento.webp',
+        n: 5, rotulo: 'Un huevo grande',
+        arte: 'assets/img/pat5_b.webp',
+        slides: {
+          narracion: [ { img: 'assets/img/pat5_a.webp', seg: 11 } ],
+          problema:  [ { img: 'assets/img/pat5_b.webp', seg: 7 } ]
+        },
         narracion: 'Todos los animales de la granja estaban muy contentos y celebraban junto con los padres y don Ramón semejante acontecimiento, pero no se habían dado cuenta que:',
         problema: 'De los 26 huevos, 1 —el más grande de todos— aún permanecía intacto. ¿Cuántos huevos eran pequeños?',
         pregunta: '¿Cuántos huevos eran pequeños?',
@@ -322,6 +369,12 @@ const CUENTOS = [
    Los textos originales del cuento no se tocan: viven en
    `narracion`, `problema` y `opciones`.
    ------------------------------------------------------------ */
+/* Retrato de Martín para el consejo del menú de ayuda.
+   Cuando tengas un recorte de su cara (cuadrado, fondo transparente),
+   guárdalo como assets/img/martin-cara.webp y cambia esta línea por:
+   const MARTIN_RETRATO = 'assets/img/martin-cara.webp'; */
+const MARTIN_RETRATO = 'assets/img/martin.webp';
+
 const MARTIN = {
   saludo: '¡Hola! Soy Martín. Te voy a acompañar en esta aventura. ' +
           'Vamos a viajar por dos cuentos y a resolver los problemas que ' +
@@ -348,15 +401,61 @@ const POLYA_ASESOR = {
 };
 
 /* Voces recuperadas del SWF original. */
+/* Pistas generales. Sustituye estos archivos por los tuyos manteniendo
+   el nombre, o cambia la ruta. */
 const VOCES_COMPLETAS = {
-  narracion: 'assets/audio/voces/voz_0787.mp3',
-  polya: 'assets/audio/voces/voz_0850.mp3',
-  narrador: 'assets/audio/voces/voz_0068.mp3'
+  narracion: 'assets/audio/voces/voz_0787.mp3',  // respaldo si falta la del capítulo
+  polya:     'assets/audio/voces/polya_metodo.mp3',
+  ayuda:     'assets/audio/voces/martin_ayuda.mp3',
+  narrador:  'assets/audio/voces/voz_0068.mp3'
 };
 
-/* Asignación segmento → escena. Usa herramienta-voces.html del proyecto
-   anterior para completarlo; mientras esté vacío se usa la pista completa. */
-const VOCES = {};
+/* ------------------------------------------------------------
+   VOCES POR CAPÍTULO
+   Copia los MP3 en assets/audio/voces/ con estos nombres exactos.
+   Lo que no exista todavía cae en la pista de respaldo, así que
+   puedes ir grabando de a poco sin romper nada.
+
+   La clave es  cuento : capítulo : bloque
+     narracion → la historia
+     problema  → el enunciado del problema
+     fin       → la felicitación al completar el capítulo
+   ------------------------------------------------------------ */
+const VOCES = {
+  // Caperucita Roja
+  'caperucita:1:narracion': 'assets/audio/voces/cap1_cuento.mp3',
+  'caperucita:1:problema':  'assets/audio/voces/cap1_problema.mp3',
+  'caperucita:1:fin':       'assets/audio/voces/cap1_fin.mp3',
+  'caperucita:2:narracion': 'assets/audio/voces/cap2_cuento.mp3',
+  'caperucita:2:problema':  'assets/audio/voces/cap2_problema.mp3',
+  'caperucita:2:fin':       'assets/audio/voces/cap2_fin.mp3',
+  'caperucita:3:narracion': 'assets/audio/voces/cap3_cuento.mp3',
+  'caperucita:3:problema':  'assets/audio/voces/cap3_problema.mp3',
+  'caperucita:3:fin':       'assets/audio/voces/cap3_fin.mp3',
+  'caperucita:4:narracion': 'assets/audio/voces/cap4_cuento.mp3',
+  'caperucita:4:problema':  'assets/audio/voces/cap4_problema.mp3',
+  'caperucita:4:fin':       'assets/audio/voces/cap4_fin.mp3',
+  'caperucita:5:narracion': 'assets/audio/voces/cap5_cuento.mp3',
+  'caperucita:5:problema':  'assets/audio/voces/cap5_problema.mp3',
+  'caperucita:5:fin':       'assets/audio/voces/cap5_fin.mp3',
+
+  // El Patito Feo
+  'patito:1:narracion': 'assets/audio/voces/pat1_cuento.mp3',
+  'patito:1:problema':  'assets/audio/voces/pat1_problema.mp3',
+  'patito:1:fin':       'assets/audio/voces/pat1_fin.mp3',
+  'patito:2:narracion': 'assets/audio/voces/pat2_cuento.mp3',
+  'patito:2:problema':  'assets/audio/voces/pat2_problema.mp3',
+  'patito:2:fin':       'assets/audio/voces/pat2_fin.mp3',
+  'patito:3:narracion': 'assets/audio/voces/pat3_cuento.mp3',
+  'patito:3:problema':  'assets/audio/voces/pat3_problema.mp3',
+  'patito:3:fin':       'assets/audio/voces/pat3_fin.mp3',
+  'patito:4:narracion': 'assets/audio/voces/pat4_cuento.mp3',
+  'patito:4:problema':  'assets/audio/voces/pat4_problema.mp3',
+  'patito:4:fin':       'assets/audio/voces/pat4_fin.mp3',
+  'patito:5:narracion': 'assets/audio/voces/pat5_cuento.mp3',
+  'patito:5:problema':  'assets/audio/voces/pat5_problema.mp3',
+  'patito:5:fin':       'assets/audio/voces/pat5_fin.mp3'
+};
 
 /* Cada parte del cuento tiene 4 pasos y cada paso da 1 llave:
    4 pasos × 5 partes = 20 llaves por cuento. */
@@ -373,5 +472,5 @@ const MEDALLAS = [
 
 window.DATOS = { APP, PASOS, AYUDA, INSTRUCCIONES, SELECTOR_INTRO, SELECTOR_INTRO_NUEVO, CUENTOS, VOCES,
                  SLIDES_POR_DEFECTO,
-                 VOCES_COMPLETAS, MEDALLAS, MARTIN, POLYA_ASESOR,
+                 VOCES_COMPLETAS, MEDALLAS, MARTIN, MARTIN_RETRATO, POLYA_ASESOR,
                  LLAVES_POR_PARTE, LLAVES_POR_CUENTO };

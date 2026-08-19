@@ -68,12 +68,23 @@ body{
 .material-symbols-rounded{
   font-family:'Material Symbols Rounded';
   font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24;
-  line-height:1; user-select:none;
-  /* Si la fuente de iconos no llega a cargar, el navegador dibujaría el
-     nombre del icono como texto y reventaría el ancho de los botones.
-     Con caja fija y recorte, el diseño aguanta igual. */
-  display:inline-grid; place-items:center;
-  width:1em; height:1em; overflow:hidden; white-space:nowrap;
+  /* Centrado fiable: caja cuadrada, glifo centrado por flex y sin
+     interlineado ni línea base que lo desplacen. */
+  display:inline-flex; align-items:center; justify-content:center;
+  width:1em; height:1em; line-height:1;
+  font-size:inherit; font-style:normal; font-weight:normal;
+  letter-spacing:normal; text-transform:none; white-space:nowrap;
+  direction:ltr; overflow:hidden; user-select:none;
+  -webkit-font-feature-settings:'liga'; -webkit-font-smoothing:antialiased;
+}
+/* Todo contenedor de icono centra por rejilla, sin depender del texto */
+.redondo, .martin__btn, .circulo, .opcion__letra,
+.paso-fila__icono, .icono-fila__caja, .paso-num__n{
+  flex:none; width:clamp(34px,4.8vh,48px); aspect-ratio:1;
+  border-radius:50%; background:var(--naranja-btn);
+  color:#fff8f1 !important;              /* crema: el café no se distinguía */
+  font-family:var(--cuerpo); font-weight:800;
+  font-size:clamp(1rem,2.3vh,1.35rem);
 }
 
 h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacing:.01em; }
@@ -81,14 +92,20 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 /* ---------------- Estructura ---------------- */
 .marco{
   height:100dvh; max-width:var(--ancho); margin:0 auto;
-  padding:calc(80px + var(--sup)) clamp(14px,2.5vw,34px) calc(8px + var(--inf));
-  display:grid; grid-template-rows:auto minmax(0,1fr) auto;
+  padding:calc(10px + var(--sup)) clamp(14px,2.5vw,34px) calc(8px + var(--inf));
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
   grid-template-columns:minmax(0,1fr);
   gap:clamp(6px,1.2vh,14px); overflow:hidden;
 }
 
 /* ---------------- Cabecera ---------------- */
-.cabecera{ display:flex; align-items:center; gap:12px; min-height:clamp(52px,8vh,84px); }
+/* Cada zona ocupa su fila fija. Sin esto, al ocultar la cabecera o el
+   pie las filas se desplazaban y la vista caía en la fila equivocada:
+   por eso el contenido quedaba pegado arriba. */
+.cabecera{ grid-row:1; display:flex; align-items:center; gap:12px; min-height:clamp(52px,8vh,84px); }
+.vista{ grid-row:2; }
+.pie-fijo{ grid-row:3; }
 .cabecera__logo{ flex:none; height:clamp(46px,9vh,92px); width:auto; }
 .cabecera__centro{ flex:1; min-width:0; text-align:center; }
 .cabecera__titulo{
@@ -149,7 +166,10 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 
 /* ---------------- Vista ---------------- */
 .vista{
-  min-height:0; min-width:0; display:flex; flex-direction:column;
+  /* height:100% ata la vista a la fila 1fr del marco: sin esto se
+     encogía al alto de su contenido y los créditos no llegaban
+     al borde inferior. */
+  height:100%; min-height:0; min-width:0; display:flex; flex-direction:column;
   animation:surgir .35s cubic-bezier(.2,.8,.3,1) both;
 }
 @keyframes surgir{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }
@@ -196,14 +216,14 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .enlace:hover{ text-decoration:underline; }
 .enlace__i{
   display:grid; place-items:center; width:1.7em; aspect-ratio:1;
-  border-radius:50%; background:var(--naranja-btn); color:#fff; font-size:18px;
+  border-radius:50%; background:var(--naranja-btn); color:#fff; font-size:.8em;
 }
 
 /* ---------------- Portada ---------------- */
 .portada{
   flex:1; min-height:0; width:100%;
   display:grid; align-content:center; justify-content:center; justify-items:center;
-  gap:clamp(10px,2vh,26px); text-align:center;
+  gap:clamp(10px,2.2vh,28px); text-align:center;
 }
 /* Punto 1: los textos respiran en un contenedor más ancho (960 px). */
 .portada__desc{
@@ -211,37 +231,21 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   font-size:clamp(.95rem,2.3vh,1.5rem); line-height:1.5;
 }
 .portada__creditos{
-  margin:0; width:min(960px,92vw); color:var(--naranja-cl); font-weight:600;
-  font-size:clamp(.65rem,1.45vh,.95rem); line-height:1.5;
+  flex:none; margin:0; padding:0 12px 2px; text-align:center;
+  width:100%; max-width:1000px; margin-inline:auto;
+  color:var(--tinta); opacity:.55; font-weight:600;
+  font-size:clamp(.6rem,1.35vh,.85rem); line-height:1.45;
 }
 
 /* Punto 14: la portada respira y flota; los signos giran despacio alrededor. */
-.portada__orbita{
-  position:relative; display:grid; place-items:center;
-  width:min(46vh,330px,78vw); aspect-ratio:1;
-  overflow:hidden;              /* las chispas nunca se salen de la pantalla */
-}
 .portada__logo{
-  width:76%; max-height:100%; object-fit:contain; position:relative; z-index:1;
-  animation:flotarLogo 8.5s ease-in-out infinite;
+  width:min(34vh,300px,72vw); height:auto; object-fit:contain;
+  animation:flotarLogo 4.5s ease-in-out infinite;
 }
 @keyframes flotarLogo{
-  0%,100%{ transform:translateY(0) rotate(-0.5deg) }
-  50%    { transform:translateY(-14px) rotate(0.5deg) }
+  0%,100%{ transform:translateY(0) rotate(-1deg) }
+  50%    { transform:translateY(-14px) rotate(1deg) }
 }
-.chispa{
-  position:absolute; left:50%; top:50%;
-  font-family:var(--titulo); font-weight:600; color:var(--naranja-cl);
-  font-size:clamp(1.1rem,2.5vh,2rem); opacity:.75;
-  transform-origin:0 0;
-  animation:orbita 18s linear infinite;
-  animation-delay:calc(var(--i) * -3s);
-}
-@keyframes orbita{
-  from{ transform:rotate(0deg) translateX(var(--radio)) rotate(0deg) }
-  to  { transform:rotate(360deg) translateX(var(--radio)) rotate(-360deg) }
-}
-.portada__orbita{ --radio:min(21vh,158px,34vw); }
 .btn--grande{ font-size:clamp(1.1rem,2.7vh,1.75rem); padding:clamp(13px,2.2vh,22px) clamp(34px,4vw,60px); }
 
 /* ---------------- Selección de cuento ---------------- */
@@ -300,79 +304,13 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .capitulo[data-bloqueado] .material-symbols-rounded{ font-size:1.1em; vertical-align:-.15em; }
 
 /* Barra camino al tesoro */
-.camino{
-  position:relative; display:flex; align-items:center;
-  max-width:900px; margin:0 auto; padding:0 clamp(34px,5vh,54px);
-}
-.camino__pista{
-  flex:1; position:relative; height:clamp(34px,5.4vh,54px);
-  border-radius:99px; background:#8a5a3c; overflow:hidden;
-  display:grid; place-items:center;
-}
-.camino__relleno{
-  position:absolute; left:0; top:0; bottom:0; width:0;
-  background:linear-gradient(180deg,#ffd873,var(--oro));
-  border-radius:99px; transition:width 1s cubic-bezier(.2,.8,.3,1);
-}
-.camino__cifra{
-  position:relative; font-family:var(--titulo); font-weight:600; color:var(--tinta);
-  font-size:clamp(.95rem,2.4vh,1.5rem);
-}
-.camino__extremo{
-  position:absolute; top:50%; transform:translateY(-50%);
-  width:clamp(52px,8vh,84px); aspect-ratio:1; border-radius:50%;
-  background:var(--naranja); border:3px solid var(--naranja-osc);
-  display:grid; place-items:center; overflow:hidden; z-index:1;
-}
-.camino__extremo--ini{ left:0; }
-.camino__extremo--fin{ right:0; }
-.camino__extremo img{ width:82%; height:82%; object-fit:contain; }
-.camino__extremo--fin[data-abierto]{ animation:latir 1.6s ease-in-out infinite; }
 @keyframes latir{ 0%,100%{transform:translateY(-50%) scale(1)} 50%{transform:translateY(-50%) scale(1.12)} }
 
 /* ---------------- Pantalla del cuento ---------------- */
-.escena{
-  flex:1; min-height:0; display:grid; gap:clamp(12px,2vw,26px);
-  grid-template-columns:minmax(0,.85fr) minmax(0,1.6fr) auto;
-  align-items:stretch;
-}
-.escena__ilustracion{
-  align-self:center; max-height:100%; min-height:0;
-  border-radius:var(--r-lg); overflow:hidden;
-  background:var(--papel); border:2px solid var(--naranja-sua);
-  display:grid; place-items:center;
-}
-.escena__ilustracion img{
-  width:100%; height:auto; max-height:100%; object-fit:contain;
-  animation:aparece .5s ease both;
-}
 @keyframes aparece{ from{opacity:0; transform:scale(.97)} to{opacity:1; transform:none} }
 
-.hoja{
-  min-height:0; display:flex; flex-direction:column;
-  padding:clamp(16px,2.6vh,34px) clamp(16px,2vw,38px);
-  border-radius:var(--r-xl); background:var(--papel); box-shadow:var(--sombra);
-  overflow-y:auto; scrollbar-width:thin;
-}
-.hoja::-webkit-scrollbar{ width:8px; }
-.hoja::-webkit-scrollbar-thumb{ background:var(--naranja-cl); border-radius:99px; }
-.hoja__titulo{
-  margin:0 0 clamp(8px,1.6vh,18px); font-family:var(--titulo); font-weight:600;
-  font-size:clamp(1.15rem,3.4vh,2.3rem); color:var(--tinta);
-}
-.hoja__texto{
-  margin:0 0 12px; line-height:1.55; color:var(--tinta);
-  font-size:clamp(.95rem,2.3vh,1.5rem);
-}
-.hoja__texto b{ font-weight:800; }
-.hoja__texto:last-child{ margin-bottom:0; }
 
 /* Martín y sus controles */
-.martin{
-  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-  gap:clamp(8px,1.6vh,16px); width:clamp(120px,17vw,290px);
-}
-.martin__figura{ width:100%; object-fit:contain; min-height:0; flex:1; }
 .martin__controles{ display:flex; gap:clamp(6px,1vw,14px); flex:none; min-width:0; }
 .martin__btn{
   display:grid; place-items:center; padding:0;
@@ -386,12 +324,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .martin__btn[disabled]{ opacity:.35; pointer-events:none; }
 .martin__btn .material-symbols-rounded{ font-size:clamp(20px,3vh,32px); }
 
-.puntos{ display:flex; gap:7px; justify-content:center; flex:none; }
-.puntos i{
-  width:9px; height:9px; border-radius:50%; background:var(--naranja-cl);
-  transition:background .3s, transform .3s;
-}
-.puntos i[data-activo]{ background:var(--naranja); transform:scale(1.35); }
 
 /* ---------------- Modal ---------------- */
 .modal{
@@ -434,22 +366,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .paso-fila__texto b{ font-weight:800; }
 
 /* ---------------- Resolución del problema ---------------- */
-.reto{ flex:1; min-height:0; display:grid; gap:clamp(10px,1.8vw,24px);
-  grid-template-columns:minmax(0,.8fr) minmax(0,1.7fr); align-items:stretch; }
-.reto__lado{ min-height:0; display:flex; flex-direction:column; gap:10px; }
-.reto__ilustracion{
-  flex:1; min-height:0; border-radius:var(--r-lg); overflow:hidden;
-  background:var(--papel); border:2px solid var(--naranja-sua); display:grid; place-items:center;
-}
-.reto__ilustracion img{ width:100%; height:100%; object-fit:contain; padding:6px; }
-.reto__panel{
-  min-height:0; display:flex; flex-direction:column; gap:clamp(8px,1.4vh,16px);
-  padding:clamp(14px,2.4vh,30px) clamp(14px,2vw,32px);
-  border-radius:var(--r-xl); background:var(--papel); box-shadow:var(--sombra);
-  overflow-y:auto; scrollbar-width:thin;
-}
-.reto__panel::-webkit-scrollbar{ width:8px; }
-.reto__panel::-webkit-scrollbar-thumb{ background:var(--naranja-cl); border-radius:99px; }
 
 .pasos-tira{ display:flex; gap:clamp(5px,.8vw,12px); flex:none; }
 .pasos-tira__item{
@@ -478,11 +394,12 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 }
 .enunciado b{ font-weight:800; color:var(--naranja-txt); }
 
-.fichas{ display:flex; flex-wrap:wrap; gap:clamp(8px,1.2vw,14px); }
 .ficha{
-  display:grid; gap:2px; justify-items:center; padding:clamp(9px,1.5vh,16px) clamp(14px,1.8vw,26px);
-  border-radius:var(--r-md); border:3px solid var(--crema-2); background:var(--papel);
-  font-family:var(--cuerpo); color:var(--tinta); cursor:pointer;
+  display:grid; gap:2px; justify-items:center;
+  padding:clamp(9px,1.5vh,16px) clamp(14px,1.8vw,26px);
+  border-radius:var(--r-md); border:3px solid var(--crema-2);
+  background:var(--papel); color:var(--tinta);
+  font-family:var(--cuerpo); cursor:pointer;
   transition:transform .14s, border-color .2s, background .2s;
 }
 .ficha:hover{ border-color:var(--naranja-cl); }
@@ -494,7 +411,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .ficha[data-mala]{ border-color:var(--rojo); background:var(--rojo-sua); animation:temblar .32s; }
 @keyframes temblar{ 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
 
-.opciones{ display:grid; gap:clamp(7px,1.2vh,12px); }
 .opcion{
   display:flex; align-items:center; gap:clamp(10px,1.4vw,18px); width:100%;
   padding:clamp(10px,1.7vh,18px) clamp(12px,1.6vw,22px); text-align:left;
@@ -511,7 +427,7 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .opcion__letra{
   flex:none; display:grid; place-items:center;
   width:clamp(30px,4.8vh,50px); aspect-ratio:1; border-radius:50%;
-  background:var(--crema-2); color:var(--naranja-txt);
+  background:var(--verde); color:var(--naranja-txt);
   font-family:var(--titulo); font-weight:600; font-size:clamp(.85rem,1.9vh,1.25rem);
 }
 .opcion__letra .material-symbols-rounded{ font-size:1.15em; }
@@ -602,12 +518,16 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .pasos-lista{ display:grid; gap:clamp(8px,1.4vh,14px); }
 .paso-num{ display:flex; gap:13px; align-items:flex-start; }
 .paso-num__n{
-  flex:none; display:grid; place-items:center; width:clamp(30px,4.4vh,42px); aspect-ratio:1;
-  border-radius:50%; background:var(--naranja-btn); color:#fff;
-  font-family:var(--titulo); font-weight:600; font-size:clamp(.85rem,1.9vh,1.1rem);
+  flex:none; display:grid; place-items:center;
+  width:clamp(34px,4.8vh,48px); aspect-ratio:1;
+  border-radius:50%; background:var(--naranja-btn);
+  color:var(--crema);
+  font-family:var(--titulo); font-weight:700;
+  font-size:clamp(1.15rem,2.6vh,1.6rem); line-height:1;
+  padding-bottom:.06em;
 }
 .paso-num b{ display:block; font-family:var(--titulo); font-weight:600; font-size:clamp(.88rem,2vh,1.15rem); }
-.paso-num span{ font-size:clamp(.78rem,1.75vh,1rem); line-height:1.45; }
+.paso-num span{ font-size:clamp(.78rem,1.75vh,1rem); color:var(--tinta-2); line-height:1.45; }
 
 /* ---------------- Instalar ---------------- */
 .instalar{
@@ -628,28 +548,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 /* ============================================================
    MÓVIL Y TABLET: una sola columna, sin scroll de página
    ============================================================ */
-@media (max-width:899px){
-  .escena{ grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) auto; }
-  .escena__ilustracion{ max-height:26vh; }
-  .martin{
-    flex-direction:row; width:100%; justify-content:space-between;
-    align-items:center; gap:10px;
-  }
-  .martin__figura{ width:clamp(60px,16vw,110px); height:auto; flex:none; }
-  .reto{ grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
-  .reto__ilustracion{ max-height:20vh; }
-  .polya-modal{ grid-template-columns:minmax(0,1fr); justify-items:center; }
-  .polya-modal__figura{ width:clamp(130px,30vh,240px); }
-  .globo::after{ left:50%; top:-22px; transform:translateX(-50%); border-right-color:transparent; border-bottom-color:var(--papel); }
-  .cuentos{ grid-template-columns:1fr; }
-  .capitulos{ grid-template-columns:1fr 1fr; }
-  .pasos-tira__item span:not(.material-symbols-rounded){ display:none; }
-}
-
-@media (max-width:640px){
-  .acciones{ flex-direction:column; }
-  .acciones .btn{ flex:1 1 auto; width:100%; }
-}
 
 @media (max-width:520px){
   .capitulos{ grid-template-columns:1fr; }
@@ -671,8 +569,8 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 
 /* Punto 15: el logo de las pantallas internas vuelve a la portada */
 .logo-enlace{ cursor:pointer; transition:transform .18s; }
-.logo-enlace:hover{ transform:scale(1.02); }
-.logo-enlace:active{ transform:scale(.98); }
+.logo-enlace:hover{ transform:scale(1.05); }
+.logo-enlace:active{ transform:scale(.97); }
 
 .titulo-cuento{
   text-align:center; margin:0 0 6px;
@@ -694,17 +592,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .aviso-polya .material-symbols-rounded{ vertical-align:-.2em; color:var(--naranja-osc); }
 
 /* Punto 8: carrusel de imágenes del cuento */
-.slide{ width:100%; display:grid; place-items:center; }
-.slide img{
-  width:100%; height:auto; max-height:100%; object-fit:contain;
-  animation:aparece .6s ease both;
-}
-.slide-puntos{ display:flex; gap:6px; justify-content:center; padding:8px 0 4px; }
-.slide-puntos i{
-  width:8px; height:8px; border-radius:50%; background:var(--naranja-sua);
-  transition:background .3s, transform .3s;
-}
-.slide-puntos i[data-activo]{ background:var(--naranja); transform:scale(1.35); }
 
 /* Punto 6: la retroalimentación dura y avisa cuándo continúa */
 .pista__cuerpo{ flex:1; min-width:0; display:grid; gap:10px; }
@@ -750,8 +637,367 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 }
 .festejo__medalla .material-symbols-rounded{ color:var(--oro); }
 
-/* El camino cabe también dentro del festejo */
-.festejo .camino{ width:100%; }
+/* La rejilla de tres zonas (escritorio) */
+.escena{
+  flex:1; min-height:0; min-width:0;
+  display:grid; gap:clamp(12px,2vw,32px);
+  grid-template-columns:minmax(0,1.15fr) minmax(0,1.5fr) auto;
+  align-items:center;
+}
 
-.redondo--sonido{ background:var(--crema-2); color:var(--naranja-txt); box-shadow:0 3px 0 #e8d7c6; }
-.redondo--sonido[aria-pressed="true"]{ opacity:.6; }
+/* Ilustración: cuadrada y centrada, se ve el motivo completo */
+.escena__ilustracion{
+  align-self:center; justify-self:center;
+  width:100%; max-height:100%; aspect-ratio:1;
+  border-radius:var(--r-lg); overflow:hidden;
+  background:var(--papel); border:2px solid var(--naranja-sua);
+  display:grid; place-items:center;
+}
+.escena__ilustracion img{
+  width:100%; height:100%;
+  object-fit:cover; object-position:center;   /* centrada: nada desfasado */
+  animation:aparece .5s ease both;
+}
+
+/* Columna central: globo + aviso, centrados verticalmente */
+.escena__centro{
+  min-width:0; max-height:100%;
+  display:flex; flex-direction:column; justify-content:center;
+  gap:clamp(10px,1.8vh,20px);
+}
+
+/* Globo de diálogo: Martín cuenta lo que se ve en la imagen */
+.globo-cuento{
+  position:relative; min-width:0; max-height:100%;
+  display:flex; flex-direction:column;
+  padding:clamp(16px,2.4vh,30px) clamp(18px,2vw,36px);
+  border-radius:var(--r-xl); background:var(--papel);
+  box-shadow:var(--sombra);
+}
+/* La cola apunta hacia Martín, a la derecha */
+.globo-cuento::after{
+  content:''; position:absolute; right:-16px; top:44px;
+  border:16px solid transparent; border-left-color:var(--papel);
+  filter:drop-shadow(3px 0 2px rgba(120,80,50,.07));
+}
+.globo-cuento__titulo{
+  margin:0 0 clamp(8px,1.4vh,16px); flex:none;
+  font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(1.1rem,3vh,2rem);
+}
+.globo-cuento__scroll{
+  min-height:0; overflow-y:auto; scrollbar-width:thin;
+  scroll-behavior:auto;
+}
+.globo-cuento__scroll::-webkit-scrollbar{ width:6px; }
+.globo-cuento__scroll::-webkit-scrollbar-thumb{
+  background:var(--naranja-cl); border-radius:99px;
+}
+.globo-cuento__texto{
+  margin:0; line-height:1.55; color:var(--tinta);
+  font-size:clamp(.95rem,2.2vh,1.45rem);
+}
+.globo-cuento__texto b{ font-weight:800; }
+
+/* Martín, a la derecha */
+.martin{
+  align-self:center; justify-self:center;
+  display:flex; flex-direction:column; align-items:center;
+  gap:clamp(8px,1.6vh,16px);
+  width:clamp(110px,15vw,260px); max-height:100%;
+}
+.martin__figura{
+  width:100%; height:auto; max-height:100%; object-fit:contain; min-height:0;
+}
+
+
+/* ============================================================
+   MÓVIL Y TABLET
+   Punto 1: Martín se esconde y solo quedan sus tres botones.
+   El texto ocupa el espacio que él dejó libre.
+   ============================================================ */
+
+/* ============================================================
+   Punto 13: celebración y camino al tesoro bien centrados
+   ============================================================ */
+
+.festejo{ width:100%; padding-bottom:clamp(8px,1.5vh,16px); }
+.festejo .acciones{
+  width:100%; max-width:660px; margin-inline:auto; flex-wrap:wrap;
+}
+.festejo .acciones .btn{ flex:1 1 240px; min-width:0; white-space:normal; }
+
+/* El botón nunca debe cortar su texto */
+.btn{ white-space:normal; text-align:center; line-height:1.2; }
+
+
+/* ============================================================
+   CAMINO AL TESORO — revisión
+   La cifra va encima de la barra; Pólya se desplaza dentro de la
+   pista sin taparla ni salirse por los extremos.
+   ============================================================ */
+.camino-bloque{
+  width:100%; max-width:760px; margin:clamp(8px,1.6vh,18px) auto;
+}
+.camino__cifra{
+  margin:0 0 8px; text-align:center;
+  font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(.9rem,2.1vh,1.3rem);
+}
+.camino{
+  position:relative; display:flex; align-items:center;
+  height:clamp(46px,7vh,72px); width:100%;
+}
+.camino__pista{
+  position:absolute; left:clamp(23px,3.5vh,36px); right:clamp(23px,3.5vh,36px);
+  top:50%; transform:translateY(-50%);
+  height:clamp(26px,4vh,40px); border-radius:99px;
+  background:#8a5a3c; overflow:hidden;
+}
+.camino__relleno{
+  position:absolute; left:0; top:0; bottom:0; width:0;
+  background:linear-gradient(180deg,#ffd873,var(--oro));
+  border-radius:99px; transition:width 1s cubic-bezier(.2,.8,.3,1);
+}
+.camino__extremo{
+  position:absolute; top:50%;
+  width:clamp(46px,7vh,72px); aspect-ratio:1;
+  border-radius:50%; background:var(--naranja);
+  border:3px solid var(--naranja-osc);
+  display:grid; place-items:center; overflow:hidden; z-index:1;
+  transform:translateY(-50%);
+}
+.camino__extremo img{ width:82%; height:82%; object-fit:contain; }
+.camino__extremo--ini{
+  left:0; transition:left 1s cubic-bezier(.2,.8,.3,1);
+}
+.camino__extremo--fin{ right:0; }
+.camino__extremo--fin[data-abierto]{ animation:latirCofre 1.6s ease-in-out infinite; }
+@keyframes latirCofre{
+  0%,100%{ transform:translateY(-50%) scale(1) }
+  50%    { transform:translateY(-50%) scale(1.12) }
+}
+
+
+
+
+/* ------------------------------------------------------------
+   Celebración en móvil: todo compacto para que el botón de
+   "Siguiente capítulo" no quede cortado abajo.
+   ------------------------------------------------------------ */
+@media (max-width:899px){
+  .festejo{ gap:clamp(6px,1.2vh,12px); }
+  .festejo__martin{ width:clamp(70px,12vh,120px); }
+  .festejo__titulo{ font-size:clamp(1.1rem,2.8vh,1.6rem); }
+  .festejo__llaves img{ width:clamp(28px,5vh,44px); }
+  .festejo__texto{ font-size:clamp(.82rem,1.9vh,1.05rem); }
+  .festejo__medalla{ font-size:clamp(.72rem,1.6vh,.9rem); padding:7px 14px; }
+  .camino{ height:clamp(40px,6vh,56px); }
+  .camino__extremo{ width:clamp(40px,6vh,56px); }
+  .camino__pista{
+    left:clamp(20px,3vh,28px); right:clamp(20px,3vh,28px);
+    height:clamp(22px,3.4vh,30px);
+  }
+  .tesoro-final{ width:min(230px,52vw,26vh); }
+}
+
+
+/* ============================================================
+   PANTALLA DE RESOLUCIÓN — revisión
+   Punto 10: arriba la ilustración y el enunciado; abajo, fuera de
+   ese contenedor, las opciones y la retroalimentación.
+   ============================================================ */
+/* Dos columnas: la ilustración a la izquierda ocupa las dos filas;
+   a la derecha, el problema arriba y las opciones justo debajo. */
+.reto{
+  flex:1; min-height:0; min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);
+  grid-template-rows:auto minmax(0,1fr);
+  gap:clamp(10px,1.8vh,18px) clamp(12px,2vw,28px);
+  align-items:start;
+}
+.reto__arriba{ display:contents; }
+.reto__ilustracion{
+  grid-column:1; grid-row:1 / span 2;
+  align-self:center; justify-self:center;
+  width:100%; max-height:100%; aspect-ratio:1;
+  border-radius:var(--r-lg); overflow:hidden;
+  background:var(--papel); border:2px solid var(--naranja-sua);
+  display:flex; align-items:center; justify-content:center;
+}
+.reto__ilustracion img{
+  width:100%; height:100%; object-fit:cover; object-position:center;
+}
+.reto__panel{
+  grid-column:2; grid-row:1;
+  min-height:0; max-height:100%; display:flex; flex-direction:column;
+  gap:clamp(8px,1.4vh,16px);
+  padding:clamp(14px,2.4vh,28px) clamp(14px,2vw,30px);
+  border-radius:var(--r-xl); background:var(--papel); box-shadow:var(--sombra);
+  overflow-y:auto; scrollbar-width:thin;
+}
+.reto__panel::-webkit-scrollbar{ width:7px; }
+.reto__panel::-webkit-scrollbar-thumb{ background:var(--naranja-cl); border-radius:99px; }
+
+/* Opciones y retroalimentación: justo debajo del problema */
+.reto__abajo{
+  grid-column:2; grid-row:2;
+  min-width:0; display:flex; flex-direction:column;
+  gap:clamp(8px,1.4vh,14px); align-items:center; width:100%;
+}
+.reto__abajo .pregunta{ text-align:center; margin:0; }
+.reto__abajo #pista{ width:100%; }
+
+/* Las fichas, como estaban: se acomodan solas y se centran */
+.fichas{
+  display:flex; flex-wrap:wrap; justify-content:center;
+  gap:clamp(8px,1.2vw,14px); width:100%;
+}
+
+/* Las opciones, como estaban: una debajo de otra, a lo ancho */
+.opciones{ display:grid; gap:clamp(8px,1.2vh,12px); width:100%; }
+
+
+/* ============================================================
+   PANTALLA DE AYUDA — saludo de Martín y firma
+   ============================================================ */
+.saludo{
+  display:flex; gap:clamp(12px,2vw,22px); align-items:center;
+  border:2px solid var(--naranja-sua);
+}
+.saludo__cara{
+  flex:0 0 auto; width:clamp(58px,9vh,110px); height:auto; aspect-ratio:1;
+  max-width:26%;                       /* nunca empuja el ancho en móvil */
+  object-fit:contain; object-position:top center;
+  border-radius:50%; background:var(--naranja-sua); padding:4px;
+}
+.saludo__cuerpo{ flex:1; min-width:0; display:grid; gap:10px; justify-items:start; }
+
+/* Botón de audio: alto normal, nunca desproporcionado */
+.btn--audio{
+  padding:clamp(8px,1.3vh,12px) clamp(14px,1.8vw,22px);
+  font-size:clamp(.8rem,1.7vh,1rem);
+}
+
+/* Punto 14: firma del autor, visible pero discreta */
+.firma{
+  margin:clamp(6px,1.4vh,14px) 0 0; text-align:center;
+  font-size:clamp(.7rem,1.5vh,.9rem); color:var(--tinta); opacity:.5;
+}
+.firma a{ color:inherit; font-weight:800; text-decoration:none; border-bottom:1px solid currentColor; }
+.firma a:hover{ opacity:1; }
+
+/* Textos de las listas de ayuda, sin desbordar */
+.icono-fila__txt, .paso-num__txt{ min-width:0; display:grid; gap:2px; }
+.icono-fila__txt b, .paso-num__txt b{ font-family:var(--titulo); font-weight:600; }
+.icono-fila, .paso-num{ align-items:center; }
+
+/* ============================================================
+   Punto 7: botones del menú de Pólya con altura normal
+   ============================================================ */
+.polya-modal .acciones{
+  display:grid; grid-template-columns:auto minmax(0,1fr);
+  gap:clamp(8px,1.2vw,14px); align-items:center; width:100%;
+}
+.polya-modal .acciones .btn{
+  flex:none; width:100%; min-height:0;
+  padding:clamp(10px,1.7vh,16px) clamp(16px,2vw,28px);
+  font-size:clamp(.9rem,1.9vh,1.2rem); white-space:nowrap;
+}
+@media (max-width:640px){
+  .polya-modal .acciones{ grid-template-columns:1fr; }
+  .polya-modal .acciones .btn{ white-space:normal; }
+}
+
+
+/* ============================================================
+   MÓVIL — revisión
+   ============================================================ */
+@media (max-width:899px){
+  .escena{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto minmax(0,1fr) auto;
+    gap:clamp(8px,1.5vh,14px); align-items:stretch;
+  }
+
+  /* Punto 5: la caja se ajusta a la imagen, sin franjas blancas a los
+     lados. Como las ilustraciones son cuadradas, la caja es cuadrada. */
+  .escena__ilustracion{
+    height:24vh; width:auto; aspect-ratio:1;
+    margin-inline:auto; justify-self:center;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .escena__ilustracion img{
+    width:100%; height:100%; object-fit:cover; object-position:center;
+  }
+  /* En móvil todo se apila en una sola columna y la pantalla entera se
+     desplaza. Con la tercera fila en minmax(0,1fr) la zona de opciones
+     quedaba limitada al alto disponible y se recortaba: la barra de
+     Continuar no se podía alcanzar. El scroll lo lleva .reto, no el panel,
+     para no tener dos áreas desplazables en la misma pantalla. */
+  .reto{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto auto auto;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .reto__ilustracion{
+    grid-column:1; grid-row:1;
+    height:17vh; width:auto; aspect-ratio:1; margin-inline:auto;
+  }
+  .reto__panel{
+    grid-column:1; grid-row:2;
+    max-height:none; overflow:visible;
+  }
+  .reto__abajo{
+    grid-column:1; grid-row:3;
+    padding-bottom:12px;
+  }
+
+  .escena__centro{ min-height:0; justify-content:flex-start; }
+  .globo-cuento{ min-height:0; }
+  .globo-cuento::after{ display:none; }
+
+  .martin{
+    width:100%; align-self:auto; justify-self:auto;
+    flex-direction:row; justify-content:center; gap:clamp(10px,3vw,20px);
+  }
+  .martin__figura{ display:none; }
+
+  .camino-bloque{ width:100%; max-width:100%; margin-inline:auto; padding:0 4px; }
+  .camino{ width:100%; margin-inline:auto; }
+
+  .polya-modal{ grid-template-columns:minmax(0,1fr); justify-items:center; }
+  .polya-modal__figura{ width:clamp(120px,24vh,200px); }
+  .globo::after{
+    left:50%; top:-22px; transform:translateX(-50%);
+    border-right-color:transparent; border-bottom-color:var(--papel);
+  }
+  .cuentos{ grid-template-columns:1fr; }
+  .capitulos{ grid-template-columns:1fr 1fr; }
+  .pasos-tira__item span:not(.material-symbols-rounded){ display:none; }
+
+  .pie-fijo{ justify-content:space-between; }
+
+  .cabecera{ min-height:auto; gap:8px; }
+  .cabecera__logo{ height:clamp(34px,8vw,48px); }
+  .cabecera__titulo{
+    font-size:clamp(.85rem,3.6vw,1.1rem);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .cabecera__sub{
+    font-size:clamp(.58rem,2.5vw,.78rem);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .circulo, .llamador{ width:clamp(38px,9vw,50px); }
+  .contador{ padding:6px 12px 6px 9px; font-size:clamp(.85rem,3.4vw,1.05rem); }
+}
+
+@media (max-width:520px){
+  .capitulos{ grid-template-columns:1fr; }
+}
+
+/* Sin el lema, los dos botones del pie van a los extremos */
+.pie-fijo{ justify-content:space-between; }

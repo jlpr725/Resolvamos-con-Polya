@@ -1,18 +1,37 @@
 /* Service worker: la app funciona sin internet una vez instalada. */
-const CACHE = 'polya-v7';
+const CACHE = 'polya-v11';
 
 const ESENCIALES = [
   './', './index.html',
   './css/estilos.css',
   './js/datos.js', './js/sonido.js', './js/progreso.js', './js/app.js',
   './assets/audio/musica-fondo.mp3',
+  // Las voces se descargan al vuelo la primera vez que suenan y quedan
+  // guardadas. No van aquí para que la app instale rápido aunque falten.
   './manifest.webmanifest',
   './icons/icono-192.png', './icons/icono-512.png',
   './assets/img/logo.webp', './assets/img/polya.webp', './assets/img/martin.webp',
   './assets/img/background.webp', './assets/img/tesoro.webp',
-  './assets/img/portada_cuento.webp', './assets/img/para_cuento.webp',
   './assets/img/avance-llamada.webp',
-  './assets/img/llave.svg', './assets/img/llave-vacia.svg'
+
+  // Portadas de los cuentos
+  './assets/img/portada_caperucita.webp',
+  './assets/img/portada_patito.webp',
+
+  // Escenas de Caperucita Roja: _a = historia, _b = problema
+  './assets/img/cap1_a.webp', './assets/img/cap1_b.webp',
+  './assets/img/cap2_a.webp', './assets/img/cap2_b.webp',
+  './assets/img/cap3_a.webp', './assets/img/cap3_b.webp',
+  './assets/img/cap4_a.webp', './assets/img/cap4_b.webp',
+  './assets/img/cap5_a.webp', './assets/img/cap5_b.webp',
+
+  // Escenas de El Patito Feo
+  './assets/img/pat1_a.webp', './assets/img/pat1_b.webp',
+  './assets/img/pat2_a.webp', './assets/img/pat2_b.webp',
+  './assets/img/pat3_a.webp', './assets/img/pat3_b.webp',
+  './assets/img/pat4_a.webp', './assets/img/pat4_b.webp',
+  './assets/img/pat5_a.webp', './assets/img/pat5_b.webp',
+  './assets/img/llave.svg'
 ];
 
 self.addEventListener('install', ev => {
