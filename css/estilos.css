@@ -93,8 +93,11 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .marco{
   height:100dvh; max-width:var(--ancho); margin:0 auto;
   padding:calc(10px + var(--sup)) clamp(14px,2.5vw,34px) calc(8px + var(--inf));
+
   display:grid;
   grid-template-rows:auto minmax(0,1fr) auto;
+
+  display:grid; grid-template-rows:auto minmax(0,1fr) auto;
   grid-template-columns:minmax(0,1fr);
   gap:clamp(6px,1.2vh,14px); overflow:hidden;
 }
