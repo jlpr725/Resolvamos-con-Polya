@@ -12,11 +12,24 @@
 (function () {
   'use strict';
 
+  /* ------------------------------------------------------------
+     VOLÚMENES  ← AQUÍ SE AJUSTA LA MÚSICA DE FONDO
+     Van de 0 (silencio) a 1 (máximo). La música arranca sola y
+     se mantiene siempre baja; ya no hay botón para apagarla.
+
+       ambiente → portada, instrucciones y menús
+       juego    → dentro de un capítulo
+       agachada → mientras Martín o Pólya hablan
+
+     Si aún la escuchas alta, baja los tres valores por igual.
+     ------------------------------------------------------------ */
   var VOL = {
-    ambiente:   0.34,   // portada, instrucciones, menús
-    juego:      0.16,   // dentro de un capítulo
-    agachada:   0.05    // mientras alguien habla
+    ambiente:   0.18,
+    juego:      0.10,
+    agachada:   0.035
   };
+
+  var VOL_FESTEJO = 0.55;   // fanfarria al terminar un capítulo
   var SUAVE = 900;      // milisegundos de transición de volumen
 
   var S = {
@@ -116,6 +129,25 @@
       try { localStorage.setItem('polya.sonido', this.activo ? '1' : '0'); } catch (e) {}
       if (this.alCambiarEstado) this.alCambiarEstado();
       return this.activo;
+    },
+
+    /* ---------- fanfarria de fin de capítulo ----------
+       Suena primero el festejo y, cuando termina, entra la voz de
+       Martín cerrando el capítulo. Así no se pisan. */
+    festejar: function (vozDespues) {
+      var self = this;
+      if (!this.activo) return;
+      var f = new Audio('assets/audio/festejo.mp3');
+      f.volume = VOL_FESTEJO;
+      this.subirA(VOL.agachada);
+      f.onended = function () {
+        if (vozDespues) self.reproducirVoz(vozDespues);
+        else self.subirA(self.activo ? self.nivelBase : 0);
+      };
+      f.play().catch(function () {
+        /* Si el navegador bloquea el audio, la voz igual debe sonar */
+        if (vozDespues) self.reproducirVoz(vozDespues);
+      });
     },
 
     /* ---------- efectos ---------- */

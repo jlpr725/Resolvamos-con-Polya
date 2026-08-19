@@ -404,10 +404,11 @@ const POLYA_ASESOR = {
 /* Pistas generales. Sustituye estos archivos por los tuyos manteniendo
    el nombre, o cambia la ruta. */
 const VOCES_COMPLETAS = {
-  narracion: 'assets/audio/voces/voz_0787.mp3',  // respaldo si falta la del capítulo
-  polya:     'assets/audio/voces/polya_metodo.mp3',
-  ayuda:     'assets/audio/voces/martin_ayuda.mp3',
-  narrador:  'assets/audio/voces/voz_0068.mp3'
+  narracion:  'assets/audio/voces/voz_0787.mp3',  // respaldo si falta la del capítulo
+  polya:      'assets/audio/voces/polya_metodo.mp3',
+  ayuda:      'assets/audio/voces/martin_ayuda.mp3',
+  bienvenida: 'assets/audio/voces/martin_bienvenida.mp3',  // suena al entrar a la portada
+  narrador:   'assets/audio/voces/voz_0068.mp3'
 };
 
 /* ------------------------------------------------------------

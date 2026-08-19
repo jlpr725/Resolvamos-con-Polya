@@ -16,9 +16,26 @@
   var CLAVE = 'polya.progreso.v2';
   var PASOS_POR_PARTE = 4;
 
+  /* ------------------------------------------------------------
+     REINICIO AL ABRIR
+     La aplicación se usa en una sola clase: cada vez que se abre
+     debe empezar de cero, sin avance del grupo anterior.
+
+     Ponlo en false si algún día quieres que el avance se conserve
+     entre sesiones (por ejemplo, si un niño la usa en su casa).
+
+     Ojo: con true, recargar la página a mitad de clase también
+     borra el avance.
+     ------------------------------------------------------------ */
+  var REINICIAR_AL_ABRIR = true;
+
   var vacio = { partes: {}, medallas: [], ultima: null };
 
   function leer() {
+    if (REINICIAR_AL_ABRIR) {
+      try { localStorage.removeItem(CLAVE); } catch (e) {}
+      return JSON.parse(JSON.stringify(vacio));
+    }
     try {
       var s = localStorage.getItem(CLAVE);
       if (!s) return JSON.parse(JSON.stringify(vacio));

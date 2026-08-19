@@ -22,6 +22,13 @@
 </head>
 <body>
 
+<!-- Pantalla de carga: se muestra hasta que están listos los recursos -->
+<div id="splash" class="splash">
+  <img class="splash__logo" src="assets/img/logo.webp" alt="Resolvamos con Pólya">
+  <div class="splash__barra"><i id="splashBarra"></i></div>
+  <p class="splash__texto">Cargando…</p>
+</div>
+
 <div class="marco">
 
   <header class="cabecera" id="cabecera" hidden>
@@ -33,10 +40,6 @@
     <button class="llamador" id="btnPolya" hidden data-activo="0"
             aria-label="Llamar al profesor Pólya">
       <img src="assets/img/avance-llamada.webp" alt="">
-    </button>
-    <button class="redondo redondo--sonido" id="btnSonido" aria-pressed="false"
-            aria-label="Silenciar el sonido">
-      <span class="material-symbols-rounded">volume_up</span>
     </button>
     <div class="contador" id="contador" hidden>
       <img src="assets/img/llave.svg" alt="Llaves"><span id="totalLlaves">0</span>

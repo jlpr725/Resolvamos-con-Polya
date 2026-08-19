@@ -19,7 +19,6 @@ var btnPolya  = document.getElementById('btnPolya');
 var pieFijo   = document.getElementById('pieFijo');
 var btnAtras  = document.getElementById('btnAtras');
 var btnInfo   = document.getElementById('btnInfo');
-var btnSonido = document.getElementById('btnSonido');
 var modal     = document.getElementById('modal');
 var modalCaja = document.getElementById('modalCaja');
 
@@ -67,13 +66,6 @@ SND.alCambiarEstado = function () {
   if (ip) ip.textContent = sonando ? 'pause' : 'play_arrow';
   var tp = document.getElementById('textoOirPolya');
   if (tp) tp.textContent = sonando ? 'Pausar' : 'Escuchar';
-  var s = document.getElementById('btnSonido');
-  if (s) {
-    s.querySelector('.material-symbols-rounded').textContent =
-      SND.activo ? 'volume_up' : 'volume_off';
-    s.setAttribute('aria-pressed', SND.activo ? 'false' : 'true');
-    s.setAttribute('aria-label', SND.activo ? 'Silenciar el sonido' : 'Activar el sonido');
-  }
 };
 
 function rutaVoz(tipo){
@@ -683,7 +675,7 @@ function festejar(){
   if (tesoroAbierto){
     h += '<h2 class="festejo__titulo">¡Abriste el tesoro!</h2>' +
       '<div class="tesoro-final">' +
-        '<img class="tesoro-final__cofre" src="'+IMG+'tesoro.webp" alt="Tesoro abierto">' +
+        '<img class="tesoro-final__cofre" src="'+IMG+'cofre_abierto.webp" alt="Tesoro abierto">' +
       '</div>' +
       '<p class="festejo__texto"><b>¡Reuniste las '+tope+' llaves de '+esc(c.titulo)+'!</b><br>' +
       'Aprendiste a leer con atención, a pensar un plan antes de calcular, a resolver ' +
@@ -727,13 +719,13 @@ function caminoHTML(llaves, tope, abierto){
   return '<div class="camino-bloque">' +
       '<p class="camino__cifra">'+llaves+' de '+tope+' llaves</p>' +
       '<div class="camino">' +
+        '<span class="camino__pista">' +
+          '<span class="camino__relleno" data-w="'+pct+'"></span>' +
+        '</span>' +
         '<span class="camino__extremo camino__extremo--ini" id="caminoMartin">' +
           '<img src="'+IMG+'avance-llamada.webp" alt="Tu avance"></span>' +
         '<span class="camino__extremo camino__extremo--fin"'+(abierto?' data-abierto="1"':'')+
           '><img src="'+IMG+'tesoro.webp" alt="Tesoro"></span>' +
-  '<span class="camino__pista">' +
-          '<span class="camino__relleno" data-w="'+pct+'"></span>' +
-        '</span>' +    
       '</div>' +
     '</div>';
 }
@@ -747,9 +739,12 @@ function animarCamino(){
   var rell = document.querySelector('.camino__relleno');
   if (m && pista && rell){
     /* Pólya se mueve dentro de la pista, sin salirse por los extremos. */
+    var pct = Number(rell.dataset.w);
     var recorrido = pista.offsetWidth - m.offsetWidth;
-    var avance = recorrido * Number(rell.dataset.w) / 100;
-    m.style.left = Math.round(pista.offsetLeft + avance) + 'px';
+    m.style.left = Math.round(pista.offsetLeft + recorrido * pct / 100) + 'px';
+    /* Al llegar al 100 % se esconde tras el cofre: si no, quedaba
+       montado sobre él con un leve desfase. */
+    if (pct >= 100) m.dataset.oculto = '1'; else delete m.dataset.oculto;
   }
 }
 
@@ -914,7 +909,6 @@ document.addEventListener('click', function(ev){
 
 btnAtras.addEventListener('click', atras);
 btnInfo.addEventListener('click', function(){ pitido('clic'); verInstrucciones(); });
-btnSonido.addEventListener('click', function(){ SND.alternarTodo(); });
 btnPolya.addEventListener('click', function(){
   if (btnPolya.dataset.activo!=='1'){ pitido('mal'); return; }
   pitido('clic'); abrirPolya();
@@ -943,5 +937,55 @@ if ('serviceWorker' in navigator){
   });
 }
 
-verPortada();
+/* ============================================================
+   PANTALLA DE CARGA
+   Precarga las imágenes pesadas y muestra el avance. Al terminar
+   entra la portada y Martín da la bienvenida.
+   ============================================================ */
+function arrancar(){
+  var splash  = document.getElementById('splash');
+  var barra   = document.getElementById('splashBarra');
+
+  /* Lo que conviene tener listo antes de empezar */
+  var recursos = [ IMG+'logo.webp', IMG+'martin.webp', IMG+'polya.webp',
+                   IMG+'tesoro.webp', IMG+'cofre_abierto.webp',
+                   IMG+'avance-llamada.webp', IMG+'background.webp' ];
+  D.CUENTOS.forEach(function(c){
+    recursos.push(c.portada);
+    c.escenas.forEach(function(e){ if (e.arte) recursos.push(e.arte); });
+  });
+
+  var listos = 0, total = recursos.length, terminado = false;
+  function avanzar(){
+    listos++;
+    if (barra) barra.style.width = Math.round(listos/total*100) + '%';
+    if (listos >= total) entrar();
+  }
+  function entrar(){
+    if (terminado) return;
+    terminado = true;
+    if (barra) barra.style.width = '100%';
+    setTimeout(function(){
+      if (splash) splash.dataset.listo = '1';
+      verPortada();
+      SND.iniciarMusica();
+      /* Bienvenida de Martín, si su archivo existe */
+      if (SND.activo && D.VOCES_COMPLETAS.bienvenida){
+        setTimeout(function(){
+          SND.reproducirVoz(D.VOCES_COMPLETAS.bienvenida);
+        }, 700);
+      }
+    }, 350);
+  }
+
+  recursos.forEach(function(r){
+    var img = new Image();
+    img.onload = img.onerror = avanzar;
+    img.src = r;
+  });
+  /* Red de seguridad: la carga nunca se queda colgada */
+  setTimeout(entrar, 6000);
+}
+
+arrancar();
 })();

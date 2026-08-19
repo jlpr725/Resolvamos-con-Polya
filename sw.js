@@ -1,11 +1,12 @@
 /* Service worker: la app funciona sin internet una vez instalada. */
-const CACHE = 'polya-v11';
+const CACHE = 'polya-v13';
 
 const ESENCIALES = [
   './', './index.html',
   './css/estilos.css',
   './js/datos.js', './js/sonido.js', './js/progreso.js', './js/app.js',
   './assets/audio/musica-fondo.mp3',
+  './assets/audio/festejo.mp3',
   // Las voces se descargan al vuelo la primera vez que suenan y quedan
   // guardadas. No van aquí para que la app instale rápido aunque falten.
   './manifest.webmanifest',
@@ -13,6 +14,7 @@ const ESENCIALES = [
   './assets/img/logo.webp', './assets/img/polya.webp', './assets/img/martin.webp',
   './assets/img/background.webp', './assets/img/tesoro.webp',
   './assets/img/avance-llamada.webp',
+  './assets/img/cofre_abierto.webp',
 
   // Portadas de los cuentos
   './assets/img/portada_caperucita.webp',
