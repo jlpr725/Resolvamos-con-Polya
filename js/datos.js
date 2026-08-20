@@ -438,6 +438,9 @@ const VOCES = {
   'caperucita:4:fin':       'assets/audio/voces/cap4_fin.mp3',
   'caperucita:5:narracion': 'assets/audio/voces/cap5_cuento.mp3',
   'caperucita:5:problema':  'assets/audio/voces/cap5_problema.mp3',
+  /* cierre → el desenlace del cuento. Suena en el paso 4 (Reviso),
+     antes de la celebración. Solo lo tienen los capítulos finales. */
+  'caperucita:5:cierre':    'assets/audio/voces/cap5_cierre.mp3',
   'caperucita:5:fin':       'assets/audio/voces/cap5_fin.mp3',
 
   // El Patito Feo
@@ -455,6 +458,7 @@ const VOCES = {
   'patito:4:fin':       'assets/audio/voces/pat4_fin.mp3',
   'patito:5:narracion': 'assets/audio/voces/pat5_cuento.mp3',
   'patito:5:problema':  'assets/audio/voces/pat5_problema.mp3',
+  'patito:5:cierre':    'assets/audio/voces/pat5_cierre.mp3',
   'patito:5:fin':       'assets/audio/voces/pat5_fin.mp3'
 };
 

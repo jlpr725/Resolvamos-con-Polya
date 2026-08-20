@@ -89,14 +89,26 @@
       this.voz.volume = this.activo ? 1 : 0;
       this.alTerminarVoz = alTerminar || null;
       var self = this;
-      this.voz.onended = function () {
+      var yaCerrado = false;
+
+      /* El encadenado del cuento depende de que esto se llame SIEMPRE.
+         Si el archivo no existe o el navegador bloquea la reproducción,
+         `onended` nunca dispararía y la secuencia se quedaría colgada:
+         por eso se cierra también ante un error. */
+      function cerrar () {
+        if (yaCerrado) return;
+        yaCerrado = true;
         self.voz = null;
         self.subirA(self.activo ? self.nivelBase : 0);
         if (self.alTerminarVoz) self.alTerminarVoz();
         if (self.alCambiarEstado) self.alCambiarEstado();
-      };
+      }
+
+      this.voz.onended = cerrar;
+      this.voz.onerror = cerrar;
+
       this.subirA(this.activo ? VOL.agachada : 0);
-      this.voz.play().catch(function () {});
+      this.voz.play().catch(function () { cerrar(); });
       if (this.alCambiarEstado) this.alCambiarEstado();
       return true;
     },

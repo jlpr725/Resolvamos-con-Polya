@@ -836,7 +836,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   padding:clamp(14px,2.4vh,28px) clamp(14px,2vw,30px);
   border-radius:var(--r-xl); background:var(--papel); box-shadow:var(--sombra);
   overflow-y:auto; scrollbar-width:thin;
-  align-self: center;
 }
 .reto__panel::-webkit-scrollbar{ width:7px; }
 .reto__panel::-webkit-scrollbar-thumb{ background:var(--naranja-cl); border-radius:99px; }
@@ -1074,4 +1073,36 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
     left:clamp(22px,3.3vh,30px); right:clamp(22px,3.3vh,30px);
     height:clamp(24px,3.8vh,34px);
   }
+}
+
+
+/* ============================================================
+   TRANSICIÓN ENTRE BLOQUES DEL CUENTO
+   Acompaña a transicion() de app.js: el contenido sale con un
+   desvanecido y entra el siguiente, en vez de cambiar de golpe.
+   ============================================================ */
+.vista > *{
+  transition:opacity .26s ease, transform .26s ease;
+}
+.vista > .saliendo{
+  opacity:0; transform:translateY(-10px);
+}
+.vista > .entrando{
+  opacity:0; transform:translateY(12px);
+}
+
+/* El aviso de Pólya entra con calma antes de empezar a latir */
+.aviso-polya{
+  animation:avisoEntra .5s cubic-bezier(.2,.8,.3,1) both,
+            respira 2.2s ease-in-out .5s infinite;
+}
+@keyframes avisoEntra{
+  from{ opacity:0; transform:translateY(14px) scale(.97) }
+  to  { opacity:1; transform:none }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .vista > *,
+  .vista > .saliendo,
+  .vista > .entrando{ transition:none; opacity:1; transform:none; }
 }

@@ -24,7 +24,8 @@ var modalCaja = document.getElementById('modalCaja');
 
 var IMG = 'assets/img/';
 var est = { pantalla:'portada', cuento:null, parte:null, bloque:0,
-            paso:1, fallos:0, limpios:0, falloPaso:false };
+            paso:1, fallos:0, limpios:0, falloPaso:false,
+            avisoListo:false };   // el aviso «llamemos a Pólya» ya se puede mostrar
 var regreso = null;      // a dónde volver al cerrar las instrucciones
 var slider  = null;      // temporizador del carrusel de imágenes
 
@@ -144,14 +145,53 @@ function arrancarSlider(lista, autoplay){
 }
 
 /* La narración manda: al reproducir corre el carrusel, al pausar se detiene. */
+/* ============================================================
+   EL CUENTO DE CORRIDO
+   Martín narra la historia; al terminar su voz, la pantalla pasa
+   sola al problema y sigue leyendo. Cuando termina el problema
+   aparece el aviso para llamar a Pólya. Se siente como un cuento
+   continuo en vez de tres pasos sueltos.
+   ============================================================ */
 function alternarNarracion(){
   if (SND.hablando()){ SND.pausarVoz(); pausarSlider(); pararAutoScroll(); return; }
   if (SND.voz){ SND.reanudarVoz(); seguirSlider(); arrancarAutoScroll(); return; }
+  reproducirBloque();
+}
+
+function reproducirBloque(){
   var e = parteActual(); if (!e) return;
   var tipo = tipoBloque();
   arrancarSlider(slidesDe(e, tipo), true);
   arrancarAutoScroll();
-  SND.reproducirVoz(rutaVoz(tipo), function(){ pausarSlider(); pararAutoScroll(); });
+  SND.reproducirVoz(rutaVoz(tipo), alTerminarBloque);
+}
+
+function alTerminarBloque(){
+  pausarSlider(); pararAutoScroll();
+  if (est.pantalla !== 'narracion') return;
+
+  var e = parteActual(); if (!e) return;
+  var ultimo = est.bloque >= bloquesDe(e).length - 1;
+
+  if (!ultimo){
+    /* Terminó la historia: pasa solo al problema y sigue narrando. */
+    est.bloque++;
+    transicion(verNarracion);
+    setTimeout(function(){
+      if (est.pantalla === 'narracion') reproducirBloque();
+    }, 1100);
+    return;
+  }
+
+  /* Terminó el problema: ahora sí se invita a llamar a Pólya. */
+  mostrarAvisoPolya();
+}
+
+function mostrarAvisoPolya(){
+  if (est.avisoListo) return;
+  est.avisoListo = true;
+  if (est.pantalla === 'narracion') transicion(verNarracion);
+  setTimeout(function(){ pitido('bien'); }, SALIDA);
 }
 
 function alternarVozSimple(ruta){
@@ -222,6 +262,28 @@ function chrome(op){
 function pintar(html){
   vista.innerHTML = html;
   vista.classList.remove('vista'); void vista.offsetWidth; vista.classList.add('vista');
+}
+
+/* ============================================================
+   TRANSICIÓN SUAVE
+   Para los cambios encadenados del cuento (historia → problema →
+   aviso). El contenido actual se desvanece, se reemplaza mientras
+   no se ve, y entra el nuevo. Sin esto el salto es seco.
+   ============================================================ */
+var SALIDA = 260;   // milisegundos del desvanecido
+
+function transicion(dibujar){
+  var caja = vista.firstElementChild;
+  if (!caja){ dibujar(); return; }
+  caja.classList.add('saliendo');
+  setTimeout(function(){
+    dibujar();
+    var nueva = vista.firstElementChild;
+    if (nueva){
+      nueva.classList.add('entrando');
+      setTimeout(function(){ nueva.classList.remove('entrando'); }, 40);
+    }
+  }, SALIDA);
 }
 
 /* ============================================================
@@ -404,6 +466,7 @@ function bloquesDe(e){
 function empezarParte(id, n){
   est.cuento=id; est.parte=n; est.bloque=0;
   est.paso=1; est.fallos=0; est.limpios=0; est.falloPaso=false;
+  est.avisoListo=false; est.cierreSonado=false;
   verNarracion();
 }
 
@@ -416,14 +479,14 @@ function verNarracion(){
 
   chrome({ cabecera:true, logo:true, titulo:c.titulo,
            sub:e.rotulo+' – Capítulo '+e.n, llaves:true,
-           polya:true, polyaActivo:ultimo, pie:true, atras:true });
+           polya:true, polyaActivo:est.avisoListo, pie:true, atras:true });
 
   var texto = esc(b.texto);
   if (b.destacar) texto = texto.replace(esc(b.destacar), '<b>'+esc(b.destacar)+'</b>');
 
   /* El aviso de Pólya sale del globo: así el globo se ajusta al texto
      y el aviso puede colocarse donde estorbe menos. */
-  var avisoPolya = ultimo
+  var avisoPolya = est.avisoListo
     ? '<div class="aviso-polya">' +
         '<img src="'+IMG+'avance-llamada.webp" alt="">' +
         '<p><b>¡Ya conocemos el problema!</b> Vamos a llamar al profesor Pólya. ' +
@@ -464,7 +527,14 @@ function moverBloque(d){
   var bl = bloquesDe(e);
   var n = est.bloque + d;
   if (n<0 || n>=bl.length) return;
-  SND.pararVoz(); pararSlider(); pararAutoScroll(); est.bloque = n; pitido('clic'); verNarracion();
+  SND.pararVoz(); pararSlider(); pararAutoScroll();
+  est.bloque = n;
+  /* Si llega al problema por su cuenta (sin escuchar el audio o
+     saltándolo), el aviso se muestra igual: nadie debe quedarse
+     encerrado esperando una voz que quizá no exista. */
+  if (n >= bl.length - 1) est.avisoListo = true;
+  pitido('clic');
+  verNarracion();
 }
 
 /* ============================================================
@@ -564,6 +634,18 @@ function verPaso(){
 
   /* Punto 10: la ilustración y el enunciado arriba; las opciones y la
      retroalimentación abajo, fuera del contenedor de texto. */
+  /* En el último capítulo, el paso 4 es también el desenlace del cuento:
+     ahí suena el cierre antes de pasar a la celebración. */
+  if (est.paso === 4){
+    var cierre = D.VOCES[est.cuento+':'+est.parte+':cierre'];
+    if (cierre && SND.activo && !est.cierreSonado){
+      est.cierreSonado = true;
+      setTimeout(function(){
+        if (est.pantalla === 'reto') SND.reproducirVoz(cierre);
+      }, 600);
+    }
+  }
+
   pintar(
     '<div class="reto">' +
       '<div class="reto__arriba">' +
@@ -709,6 +791,11 @@ function festejar(){
 
   pintar('<div class="centrado">'+h+'</div>');
   setTimeout(animarCamino, 420);
+
+  /* Primero la fanfarria y, al terminar, la voz de Martín cerrando
+     el capítulo (capX_fin / patX_fin). Si no existe el archivo, la
+     fanfarria suena igual y no pasa nada más. */
+  if (SND.activo) SND.festejar(D.VOCES[est.cuento+':'+est.parte+':fin']);
 }
 
 /* Barra del camino al tesoro, compartida por el festejo y los capítulos. */
@@ -981,9 +1068,26 @@ function arrancar(){
       if (splash) splash.dataset.listo = '1';
       verPortada();
       SND.iniciarMusica();
+            /* Los navegadores bloquean el audio que empieza sin que el
+         usuario haya tocado la pantalla. Se intenta igual y, si lo
+         rechazan, queda esperando al primer toque en cualquier parte. */
       if (SND.activo && D.VOCES_COMPLETAS.bienvenida){
-        setTimeout(function(){
+        var bienvenidaDada = false;
+        var darBienvenida = function(){
+          if (bienvenidaDada) return;
+          bienvenidaDada = true;
           SND.reproducirVoz(D.VOCES_COMPLETAS.bienvenida);
+        };
+        setTimeout(function(){
+          var a = new Audio(D.VOCES_COMPLETAS.bienvenida);
+          a.volume = 0;
+          a.play().then(function(){
+            a.pause();
+            darBienvenida();          // el navegador sí deja: suena ya
+          }).catch(function(){
+            /* Bloqueado: espera al primer toque del usuario */
+            document.addEventListener('pointerdown', darBienvenida, { once: true });
+          });
         }, 700);
       }
     }, 350);
