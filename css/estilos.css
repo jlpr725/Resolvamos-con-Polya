@@ -813,7 +813,10 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   flex:1; min-height:0; min-width:0;
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);
-  grid-template-rows:auto minmax(0,1fr);
+  /* La fila del panel es la flexible y la de abajo toma lo que
+     necesita. Al revés, el panel crecía sin tope con los gráficos,
+     empujaba el marco y sacaba la cabecera de la pantalla. */
+  grid-template-rows:minmax(0,1fr) auto;
   gap:clamp(10px,1.8vh,18px) clamp(12px,2vw,28px);
   align-items:start;
 }
@@ -1105,4 +1108,76 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   .vista > *,
   .vista > .saliendo,
   .vista > .entrando{ transition:none; opacity:1; transform:none; }
+}
+
+
+/* ============================================================
+   GRÁFICOS DE LOS PROBLEMAS
+   Un objeto del cuento acompañado de su número, en vez de
+   repetir el objeto tantas veces como indique la cantidad.
+   ============================================================ */
+.grafico{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+  gap:clamp(10px,2vw,26px); width:100%;
+  padding:clamp(10px,1.6vh,18px) clamp(10px,1.6vw,20px);
+  border-radius:var(--r-lg); background:var(--crema-2);
+}
+.grafico--datos{ margin-top:clamp(8px,1.4vh,14px); }
+
+.grupo{ display:grid; gap:2px; justify-items:center; margin:0; min-width:0; }
+.grupo__caja{ display:flex; align-items:center; gap:clamp(4px,1vw,10px); }
+.grupo__num{
+  font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(1.5rem,4.4vh,3rem); line-height:1;
+}
+.objeto{
+  width:auto; height:clamp(34px,6.4vh,74px);
+  object-fit:contain; display:block;
+}
+/* El «huevo grande» se distingue del resto por tamaño */
+.objeto[data-tam="grande"]{ height:clamp(48px,9vh,104px); }
+.grupo__pie{
+  font-size:clamp(.7rem,1.6vh,.95rem); color:var(--tinta-2);
+  font-weight:700; text-align:center; line-height:1.25;
+}
+.grupo--resultado .grupo__num{ font-size:clamp(1.8rem,5.4vh,3.6rem); color:var(--naranja-txt); }
+
+.grafico__union,
+.grafico__signo{
+  font-family:var(--titulo); font-weight:600; color:var(--naranja-txt);
+  font-size:clamp(1.2rem,3.2vh,2.2rem); flex:none;
+}
+.grafico__incognita{
+  display:grid; place-items:center; flex:none;
+  width:clamp(40px,6.4vh,70px); aspect-ratio:1;
+  border-radius:var(--r-md); border:3px dashed var(--naranja);
+  background:var(--papel); color:var(--naranja-txt);
+  font-family:var(--titulo); font-weight:600;
+  font-size:clamp(1.3rem,3.4vh,2.2rem);
+}
+
+/* Miniatura del paso 2, dentro de cada opción */
+.mini{
+  display:inline-flex; align-items:center; gap:clamp(3px,.8vw,8px);
+  margin-top:4px; flex-wrap:wrap;
+}
+.mini b{
+  font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(1.1rem,2.6vh,1.7rem); line-height:1;
+}
+.mini .objeto{ height:clamp(24px,4vh,42px); }
+.mini .objeto[data-tam="grande"]{ height:clamp(32px,5.2vh,56px); }
+.mini__signo{
+  font-style:normal; font-family:var(--titulo); font-weight:600;
+  color:var(--naranja-txt); font-size:clamp(1rem,2.4vh,1.5rem); margin:0 2px;
+}
+
+.opcion--plan{ align-items:flex-start; }
+.opcion__cuerpo{ display:grid; gap:4px; min-width:0; }
+
+@media (max-width:899px){
+  .grafico{ gap:8px; padding:9px 8px; }
+  .objeto{ height:clamp(30px,5.2vh,52px); }
+  .objeto[data-tam="grande"]{ height:clamp(42px,7vh,72px); }
+  .grupo__num{ font-size:clamp(1.3rem,3.6vh,2rem); }
 }

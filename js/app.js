@@ -7,7 +7,7 @@
 (function () {
 'use strict';
 
-var D = window.DATOS, P = window.PROGRESO;
+var D = window.DATOS, P = window.PROGRESO, G = window.GRAFICOS;
 var vista     = document.getElementById('vista');
 var cabecera  = document.getElementById('cabecera');
 var cabLogo   = document.getElementById('cabeceraLogo');
@@ -599,19 +599,25 @@ function verPaso(){
   if (est.paso===2){
     panel = '<p class="rotulo">La pregunta</p>' +
             '<p class="pregunta">'+esc(e.pregunta)+'</p>' +
-            '<p class="enunciado">Tus datos: <b>'+e.datos[0].v+'</b> y <b>'+e.datos[1].v+'</b></p>';
+            '<p class="rotulo">Tus datos</p>' +
+            G.datosDelProblema(e);
     fuera = '<p class="pregunta">¿Qué operación vas a realizar?</p>' +
       '<div class="opciones opciones--par">' +
-        '<button class="opcion" data-plan="suma"><span class="opcion__letra">+</span>' +
-          '<span>Juntar los dos números<small>los reúno para saber cuántos hay en total</small></span></button>' +
-        '<button class="opcion" data-plan="resta"><span class="opcion__letra">−</span>' +
-          '<span>Quitar un número del otro<small>los comparo o separo una parte</small></span></button>' +
+        '<button class="opcion opcion--plan" data-plan="suma"><span class="opcion__letra">+</span>' +
+          '<span class="opcion__cuerpo">Juntar los dos números' +
+          '<small>los reúno para saber cuántos hay en total</small>' +
+          G.miniPlan(e,'suma') + '</span></button>' +
+        '<button class="opcion opcion--plan" data-plan="resta"><span class="opcion__letra">−</span>' +
+          '<span class="opcion__cuerpo">Quitar un número del otro' +
+          '<small>los comparo o separo una parte</small>' +
+          G.miniPlan(e,'resta') + '</span></button>' +
       '</div>';
   }
 
   if (est.paso===3){
     panel = '<p class="rotulo">Tu plan</p>' +
-            '<div class="cuenta">'+esc(e.cuenta)+' <em>= ?</em></div>';
+            '<div class="cuenta">'+esc(e.cuenta)+' <em>= ?</em></div>' +
+            G.operacion(e);
     fuera = '<p class="pregunta">'+esc(e.pregunta)+'</p>' +
       '<div class="opciones opciones--par">' + e.opciones.map(function(o,k){
         return '<button class="opcion" data-opcion="'+k+'">' +
@@ -622,6 +628,7 @@ function verPaso(){
   if (est.paso===4){
     panel = '<p class="rotulo">Lo que respondiste</p>' +
             '<div class="cuenta">'+esc(e.cuenta)+' <em>= '+e.resultado+'</em></div>' +
+            G.resultado(e) +
             '<p class="enunciado">'+esc(e.opciones[e.correcta])+'</p>';
     fuera = '<p class="pregunta">¿Tu respuesta responde la pregunta?</p>' +
       '<div class="opciones opciones--par">' +
@@ -909,7 +916,8 @@ document.addEventListener('click', function(ev){
         pitido('bien');
         pista('bien','<b>¡Esos son!</b> '+e1.datos[0].v+' y '+e1.datos[1].v+
           ' son los números que aparecen en el problema. Esos son los ' +
-          '<b>datos relevantes</b>: los que sí necesitamos para resolver.',
+          '<b>datos relevantes</b>: los que sí necesitamos para resolver.' +
+          G.datosDelProblema(e1),
           pasarDePaso);
         llaveGanada();
       } else {
@@ -1068,26 +1076,9 @@ function arrancar(){
       if (splash) splash.dataset.listo = '1';
       verPortada();
       SND.iniciarMusica();
-            /* Los navegadores bloquean el audio que empieza sin que el
-         usuario haya tocado la pantalla. Se intenta igual y, si lo
-         rechazan, queda esperando al primer toque en cualquier parte. */
       if (SND.activo && D.VOCES_COMPLETAS.bienvenida){
-        var bienvenidaDada = false;
-        var darBienvenida = function(){
-          if (bienvenidaDada) return;
-          bienvenidaDada = true;
-          SND.reproducirVoz(D.VOCES_COMPLETAS.bienvenida);
-        };
         setTimeout(function(){
-          var a = new Audio(D.VOCES_COMPLETAS.bienvenida);
-          a.volume = 0;
-          a.play().then(function(){
-            a.pause();
-            darBienvenida();          // el navegador sí deja: suena ya
-          }).catch(function(){
-            /* Bloqueado: espera al primer toque del usuario */
-            document.addEventListener('pointerdown', darBienvenida, { once: true });
-          });
+          SND.reproducirVoz(D.VOCES_COMPLETAS.bienvenida);
         }, 700);
       }
     }, 350);

@@ -1,10 +1,10 @@
 /* Service worker: la app funciona sin internet una vez instalada. */
-const CACHE = 'polya-v17';
+const CACHE = 'polya-v19';
 
 const ESENCIALES = [
   './', './index.html',
   './css/estilos.css',
-  './js/datos.js', './js/sonido.js', './js/progreso.js', './js/app.js',
+  './js/datos.js', './js/graficos.js', './js/sonido.js', './js/progreso.js', './js/app.js',
   './assets/audio/musica-fondo.mp3',
   './assets/audio/festejo.mp3',
   // Las voces se descargan al vuelo la primera vez que suenan y quedan
@@ -15,6 +15,12 @@ const ESENCIALES = [
   './assets/img/background.webp', './assets/img/tesoro.webp',
   './assets/img/avance-llamada.webp',
   './assets/img/cofre_abierto.webp',
+
+  // Objetos de los problemas
+  './assets/img/obj_globo_rojo.webp', './assets/img/obj_globo_azul.webp',
+  './assets/img/obj_invitacion.webp', './assets/img/obj_muneca.webp',
+  './assets/img/obj_invitados.webp',  './assets/img/obj_huevo.webp',
+  './assets/img/obj_patico.webp',     './assets/img/obj_patico_naciendo.webp',
 
   // Portadas de los cuentos
   './assets/img/portada_caperucita.webp',

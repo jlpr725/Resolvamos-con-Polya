@@ -141,7 +141,7 @@ const CUENTOS = [
         narracion: 'Como ya sabemos, Caperucita Roja era una adorable niña a quien su abuelita amaba muchísimo. Cuando cumplió los siete años le hizo una hermosa fiesta, adornó la sala con serpentinas de colores, en la mesa había una deliciosa torta y sobre ella un hermoso arco de globos elaborado con sus dos colores favoritos.',
         problema: 'Estando allí, Caperucita halló dos bolsas y le llamó la atención que en una bolsa decía: 25 globos rojos y en la otra bolsa, 12 globos azules color cielo. Se preguntó: ¿con cuántos globos hicieron el arco?',
         pregunta: '¿Con cuántos globos hicieron el arco?',
-        datos: [{ v: 25, e: 'globos rojos' }, { v: 12, e: 'globos azules' }],
+        datos: [{ v: 25, e: 'globos rojos', img: 'globo_rojo' }, { v: 12, e: 'globos azules', img: 'globo_azul' }],
         distractores: [
           { v: 2, e: 'bolsas de globos', tipo: 'otro' },
           { v: 37, e: 'globos en total', tipo: 'resultado' },
@@ -163,7 +163,7 @@ const CUENTOS = [
         narracion: 'A la fiesta se invitaron a los mejores amigos de Caperucita, con lindas tarjetas.',
         problema: 'Para esto la abuelita compró 24 tarjetas de invitación para niños y 25 tarjetas más para niñas. ¿Cuántas tarjetas compró la abuelita?',
         pregunta: '¿Cuántas tarjetas compró la abuelita?',
-        datos: [{ v: 24, e: 'tarjetas para niños' }, { v: 25, e: 'tarjetas para niñas' }],
+        datos: [{ v: 24, e: 'tarjetas para niños', img: 'invitacion_azul' }, { v: 25, e: 'tarjetas para niñas', img: 'invitacion_rosa' }],
         distractores: [
           { v: 2, e: 'grupos de amigos', tipo: 'otro' },
           { v: 49, e: 'tarjetas en total', tipo: 'resultado' },
@@ -185,7 +185,7 @@ const CUENTOS = [
         narracion: 'Para entregar las tarjetas la abuelita gastó todo un día.',
         problema: 'En la mañana la abuelita repartió 20 tarjetas y en la tarde 29 tarjetas más. ¿Cuántas tarjetas en total repartió la abuelita?',
         pregunta: '¿Cuántas tarjetas en total repartió la abuelita?',
-        datos: [{ v: 20, e: 'en la mañana' }, { v: 29, e: 'en la tarde' }],
+        datos: [{ v: 20, e: 'en la mañana', img: 'invitaciones' }, { v: 29, e: 'en la tarde', img: 'invitaciones' }],
         distractores: [
           { v: 1, e: 'día de reparto', tipo: 'otro' },
           { v: 49, e: 'tarjetas repartidas', tipo: 'resultado' },
@@ -207,13 +207,13 @@ const CUENTOS = [
         narracion: '¿Saben? Los padres de María, una amiguita de Caperucita, no tenían dinero para comprar un regalo, así que forraron una caja con un hermoso papel de colores.',
         problema: 'María sacó 8 muñecas pequeñas para regalar a Caperucita y aún le quedaron 15. ¿Cuántas muñecas tenía María en su colección?',
         pregunta: '¿Cuántas muñecas tenía María en su colección?',
-        datos: [{ v: 8, e: 'muñecas regaladas' }, { v: 15, e: 'muñecas que quedaron' }],
+        datos: [{ v: 8, e: 'muñecas regaladas', img: 'muneca' }, { v: 15, e: 'muñecas que quedaron', img: 'muneca_varias' }],
         distractores: [
           { v: 1, e: 'caja de regalo', tipo: 'otro' },
           { v: 23, e: 'muñecas de la colección', tipo: 'resultado' },
         ],
         operacion: 'suma', cuenta: '8 + 15', resultado: 23,
-        opciones: ['María tenía 95 muñecas en su colección', 'María tenía 23 muñecas en su colección'],
+        opciones: ['María tenía 32 muñecas en su colección', 'María tenía 23 muñecas en su colección'],
         correcta: 1
       },
       {
@@ -229,7 +229,7 @@ const CUENTOS = [
         narracion: 'El día de la fiesta, Caperucita recibió muchos regalos; se divirtieron, comieron torta, dulces y helado, jugaron, saltaron y bailaron animados por un payaso que los hizo reír todo el tiempo. Al finalizar todos se fueron con un regalo sorpresa y un globo rojo para las niñas y azul cielo para los niños.',
         problema: 'Todo esto me recuerda otra linda fiesta que tuvo Caperucita: cuando cumplió un año asistieron 14 invitados, y cuando cumplió los siete años asistieron 35 más que cuando cumplió un año. ¿Cuántos invitados asistieron a la fiesta de los siete años?',
         pregunta: '¿Cuántos invitados asistieron a la fiesta de los siete años?',
-        datos: [{ v: 14, e: 'invitados al primer año' }, { v: 35, e: 'invitados más' }],
+        datos: [{ v: 14, e: 'invitados al primer año', img: 'invitados_pocos' }, { v: 35, e: 'invitados más', img: 'invitados_muchos' }],
         distractores: [
           { v: 7, e: 'años que cumplió', tipo: 'otro' },
           { v: 49, e: 'invitados en total', tipo: 'resultado' },
@@ -261,7 +261,7 @@ const CUENTOS = [
         narracion: 'En la granja de don Ramón, la señora pata empolló sus huevos con mucha paciencia hasta que empezaron a nacer los primeros patitos.',
         problema: 'De 26 huevos empollados nacieron 10 lindos paticos. ¿Cuántos huevos faltan por romper? Se preguntó don Ramón.',
         pregunta: '¿Cuántos huevos faltan por romper?',
-        datos: [{ v: 26, e: 'huevos empollados' }, { v: 10, e: 'paticos nacidos' }],
+        datos: [{ v: 26, e: 'huevos empollados', img: 'huevo' }, { v: 10, e: 'paticos nacidos', img: 'patico_naciendo' }],
         distractores: [
           { v: 1, e: 'señora pata', tipo: 'otro' },
           { v: 16, e: 'huevos sin romper', tipo: 'resultado' },
@@ -283,7 +283,7 @@ const CUENTOS = [
         narracion: 'Los paticos llenaban de felicidad a los papás, a sus amigos y a don Ramón. Y con paciencia esperaban que todos nacieran. Como don Ramón amaba los números, hacía sus cuentas para distraerse un poco, y observó que:',
         problema: 'Papá pato cuidaba a los 10 paticos nacidos y a mamá pata le nacieron otros 4 paticos. ¿Cuántos paticos más tiene el pato que mamá pata? Nuevamente se preguntaba don Ramón.',
         pregunta: '¿Cuántos paticos más tiene papá pato que mamá pata?',
-        datos: [{ v: 10, e: 'paticos de papá pato' }, { v: 4, e: 'paticos de mamá pata' }],
+        datos: [{ v: 10, e: 'paticos de papá pato', img: 'patico_naciendo' }, { v: 4, e: 'paticos de mamá pata', img: 'patico' }],
         distractores: [
           { v: 2, e: 'nidos en la granja', tipo: 'otro' },
           { v: 6, e: 'paticos de diferencia', tipo: 'resultado' },
@@ -305,7 +305,7 @@ const CUENTOS = [
         narracion: 'Al cabo de un corto tiempo nació otro y luego otro y así sucesivamente.',
         problema: 'Mamá pata ya cuidaba de 13 paticos y papá pato seguía con sus 10 paticos. ¿Cuántos paticos menos tiene papá pato que mamá pata? Se preguntaba don Ramón.',
         pregunta: '¿Cuántos paticos menos tiene papá pato que mamá pata?',
-        datos: [{ v: 13, e: 'paticos de mamá pata' }, { v: 10, e: 'paticos de papá pato' }],
+        datos: [{ v: 13, e: 'paticos de mamá pata', img: 'patico' }, { v: 10, e: 'paticos de papá pato', img: 'patico' }],
         distractores: [
           { v: 2, e: 'papás pato', tipo: 'otro' },
           { v: 3, e: 'paticos de diferencia', tipo: 'resultado' },
@@ -327,7 +327,7 @@ const CUENTOS = [
         narracion: 'Entre cascarones rotos y vacíos don Ramón seguía haciendo sus cuentas.',
         problema: 'La señora pata calentó 26 huevos y han nacido 23. ¿Qué diferencia hay entre el número de huevos que tenía al inicio y el número de huevos que ya han reventado?',
         pregunta: '¿Qué diferencia hay entre los huevos del inicio y los que ya reventaron?',
-        datos: [{ v: 26, e: 'huevos calentados' }, { v: 23, e: 'paticos nacidos' }],
+        datos: [{ v: 26, e: 'huevos calentados', img: 'huevo' }, { v: 23, e: 'paticos nacidos', img: 'patico_naciendo' }],
         distractores: [
           { v: 1, e: 'señora pata', tipo: 'otro' },
           { v: 3, e: 'huevos sin abrir', tipo: 'resultado' },
@@ -349,7 +349,7 @@ const CUENTOS = [
         narracion: 'Todos los animales de la granja estaban muy contentos y celebraban junto con los padres y don Ramón semejante acontecimiento, pero no se habían dado cuenta que:',
         problema: 'De los 26 huevos, 1 —el más grande de todos— aún permanecía intacto. ¿Cuántos huevos eran pequeños?',
         pregunta: '¿Cuántos huevos eran pequeños?',
-        datos: [{ v: 26, e: 'huevos en total' }, { v: 1, e: 'huevo grande' }],
+        datos: [{ v: 26, e: 'huevos en total', img: 'huevo' }, { v: 1, e: 'huevo grande', img: 'huevo', tam: 'grande' }],
         distractores: [
           { v: 2, e: 'papás pato', tipo: 'otro' },
           { v: 25, e: 'huevos pequeños', tipo: 'resultado' },
