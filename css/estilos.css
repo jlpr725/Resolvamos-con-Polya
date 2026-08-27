@@ -87,8 +87,6 @@ body{
   font-size:clamp(1rem,2.3vh,1.35rem);
 }
 
-h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacing:.01em; }
-
 /* ---------------- Estructura ---------------- */
 .marco{
   height:100dvh; max-width:var(--ancho); margin:0 auto;
@@ -147,10 +145,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 
 /* ---------------- Pie fijo ---------------- */
 .pie-fijo{ display:flex; align-items:center; gap:12px; min-height:clamp(46px,7vh,72px); }
-.pie-fijo__lema{
-  flex:1; margin:0; text-align:center; font-family:var(--titulo); font-weight:500;
-  font-size:clamp(.7rem,1.6vh,1.05rem); color:var(--tinta-2);
-}
 .redondo{
   flex:none; display:grid; place-items:center;
   width:clamp(42px,6.4vh,64px); aspect-ratio:1; padding:0;
@@ -196,7 +190,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .btn:active{ transform:translateY(4px); box-shadow:0 0 0 var(--naranja-osc); }
 .btn:focus-visible{ outline:3px solid var(--tinta); outline-offset:3px; }
 .btn .material-symbols-rounded{ font-size:1.2em; }
-.btn--ancho{ width:100%; }
 .btn--pequeno{ font-size:.95rem; padding:9px 18px; }
 .btn--verde{ background:var(--verde-btn); box-shadow:0 4px 0 #2e5d3e; }
 .btn--verde:active{ box-shadow:0 0 0 #2e5d3e; }
@@ -309,7 +302,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 /* ---------------- Pantalla del cuento ---------------- */
 @keyframes aparece{ from{opacity:0; transform:scale(.97)} to{opacity:1; transform:none} }
 
-
 /* Martín y sus controles */
 .martin__controles{ display:flex; gap:clamp(6px,1vw,14px); flex:none; min-width:0; }
 .martin__btn{
@@ -323,7 +315,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 .martin__btn:focus-visible{ outline:3px solid var(--tinta); outline-offset:3px; }
 .martin__btn[disabled]{ opacity:.35; pointer-events:none; }
 .martin__btn .material-symbols-rounded{ font-size:clamp(20px,3vh,32px); }
-
 
 /* ---------------- Modal ---------------- */
 .modal{
@@ -353,22 +344,9 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   content:''; position:absolute; left:-12px; top:34px;
   border:12px solid transparent; border-right-color:var(--papel);
 }
-.paso-fila{
-  display:grid; grid-template-columns:auto minmax(0,1fr); gap:clamp(10px,1.5vw,20px);
-  align-items:center; margin-bottom:clamp(8px,1.5vh,16px);
-}
-.paso-fila__icono{
-  display:grid; place-items:center; width:clamp(38px,5.6vh,62px); aspect-ratio:1;
-  border-radius:50%; background:var(--naranja-btn); color:#fff;
-}
-.paso-fila__icono .material-symbols-rounded{ font-size:clamp(20px,3vh,32px); }
-.paso-fila__texto{ margin:0; font-size:clamp(.85rem,2vh,1.3rem); line-height:1.4; }
-.paso-fila__texto b{ font-weight:800; }
-
-/* ---------------- Resolución del problema ---------------- */
-
 .pasos-tira{ display:flex; gap:clamp(5px,.8vw,12px); flex:none; }
 .pasos-tira__item{
+  position:relative;
   flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; gap:7px;
   padding:clamp(7px,1.3vh,13px) 6px; border-radius:99px;
   background:var(--crema-2); color:var(--tinta-2);
@@ -562,7 +540,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   }
 }
 
-
 /* ------------------------------------------------------------
    AÑADIDOS DE ESTA REVISIÓN
    ------------------------------------------------------------ */
@@ -596,14 +573,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 /* Punto 6: la retroalimentación dura y avisa cuándo continúa */
 .pista__cuerpo{ flex:1; min-width:0; display:grid; gap:10px; }
 .pista__seguir{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.pista__barra{
-  flex:1; min-width:120px; height:10px; border-radius:99px;
-  background:rgba(255,255,255,.6); overflow:hidden;
-}
-.pista__barra i{
-  display:block; height:100%; width:0; border-radius:99px;
-  background:var(--naranja); transition:width linear;
-}
 .pista[data-tipo="bien"] .pista__barra i{ background:var(--verde); }
 
 /* Punto 11: Pólya sobre el tesoro al reunir las 20 llaves */
@@ -619,12 +588,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 @keyframes brillaCofre{
   0%,100%{ transform:scale(1) }
   50%    { transform:scale(1.05) }
-}
-/* Pólya se apoya sobre el cofre */
-.tesoro-final__polya{
-  position:absolute; left:50%; bottom:26%; width:56%;
-  transform-origin:bottom center;
-  animation:saltoAlegre 2.4s ease-in-out infinite;
 }
 @keyframes saltoAlegre{
   0%,100%{ transform:translate(-50%,0) rotate(-2deg) }
@@ -710,7 +673,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   width:100%; height:auto; max-height:100%; object-fit:contain; min-height:0;
 }
 
-
 /* ============================================================
    MÓVIL Y TABLET
    Punto 1: Martín se esconde y solo quedan sus tres botones.
@@ -729,7 +691,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 
 /* El botón nunca debe cortar su texto */
 .btn{ white-space:normal; text-align:center; line-height:1.2; }
-
 
 /* ============================================================
    CAMINO AL TESORO — revisión
@@ -778,9 +739,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   50%    { transform:translateY(-50%) scale(1.12) }
 }
 
-
-
-
 /* ------------------------------------------------------------
    Celebración en móvil: todo compacto para que el botón de
    "Siguiente capítulo" no quede cortado abajo.
@@ -800,7 +758,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   }
   .tesoro-final{ width:min(180px,42vw,21vh); }
 }
-
 
 /* ============================================================
    PANTALLA DE RESOLUCIÓN — revisión
@@ -861,7 +818,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 /* Las opciones, como estaban: una debajo de otra, a lo ancho */
 .opciones{ display:grid; gap:clamp(8px,1.2vh,12px); width:100%; }
 
-
 /* ============================================================
    PANTALLA DE AYUDA — saludo de Martín y firma
    ============================================================ */
@@ -912,7 +868,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   .polya-modal .acciones{ grid-template-columns:1fr; }
   .polya-modal .acciones .btn{ white-space:normal; }
 }
-
 
 /* ============================================================
    MÓVIL — revisión
@@ -1023,7 +978,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
 /* Sin el lema, los dos botones del pie van a los extremos */
 .pie-fijo{ justify-content:space-between; }
 
-
 /* ============================================================
    PANTALLA DE CARGA
    ============================================================ */
@@ -1078,7 +1032,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   }
 }
 
-
 /* ============================================================
    TRANSICIÓN ENTRE BLOQUES DEL CUENTO
    Acompaña a transicion() de app.js: el contenido sale con un
@@ -1109,7 +1062,6 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   .vista > .saliendo,
   .vista > .entrando{ transition:none; opacity:1; transform:none; }
 }
-
 
 /* ============================================================
    GRÁFICOS DE LOS PROBLEMAS
@@ -1180,4 +1132,78 @@ h1,h2,h3,.tipo-titulo{ font-family:var(--titulo); font-weight:600; letter-spacin
   .objeto{ height:clamp(30px,5.2vh,52px); }
   .objeto[data-tam="grande"]{ height:clamp(42px,7vh,72px); }
   .grupo__num{ font-size:clamp(1.3rem,3.6vh,2rem); }
+}
+
+/* ============================================================
+   PANTALLA DE PÓLYA
+   Figura, nombre, lo que dice y los dos botones. Su voz arranca
+   sola al llamarlo.
+   ============================================================ */
+.polya-modal__lado{ display:grid; gap:clamp(10px,1.8vh,18px); min-width:0; }
+.polya-modal__nombre{
+  margin:0; font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(1.4rem,4vh,2.6rem); line-height:1.1;
+}
+
+
+
+/* ============================================================
+   EXPLICACIÓN DE CADA PASO
+   Va en la columna derecha, bajo las pastillas, con la misma
+   caja blanca que el resto del ejercicio.
+
+   Todos los pasos ocupan el MISMO alto aunque tengan uno o
+   cuatro puntos: si no, la tarjeta daba un salto de tamaño al
+   pasar del paso 1 al 2 y se sentía que la pantalla brincaba.
+   ============================================================ */
+.reto__panel--explica{
+  justify-content:flex-start;
+  gap:clamp(10px,1.8vh,18px);
+}
+
+.explica{
+  flex:1; min-height:clamp(180px,32vh,300px);   /* alto uniforme */
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+  gap:clamp(6px,1.2vh,12px);
+}
+.explica__titulo{
+  margin:0; font-family:var(--titulo); font-weight:600; color:var(--tinta);
+  font-size:clamp(1.05rem,2.8vh,1.7rem); line-height:1.2;
+}
+.explica__paso{
+  margin:0 0 clamp(4px,1vh,10px);
+  font-family:var(--titulo); font-weight:500; color:var(--naranja-txt);
+  font-size:clamp(.85rem,2vh,1.2rem); line-height:1.25;
+}
+.explica__puntos{
+  list-style:none; margin:0; padding:0; width:100%;
+  display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center;
+  gap:clamp(8px,1.6vw,20px);
+}
+.punto{
+  display:grid; justify-items:center; align-content:start; gap:6px;
+  flex:0 1 clamp(96px,22%,150px); min-width:0;
+}
+.punto__icono{
+  display:grid; place-items:center;
+  width:clamp(36px,5.6vh,58px); aspect-ratio:1; border-radius:50%;
+  background:var(--naranja-sua); color:var(--naranja-txt);
+}
+.punto__icono .material-symbols-rounded{ font-size:clamp(20px,3vh,30px); }
+.punto__texto{
+  font-size:clamp(.68rem,1.5vh,.9rem); line-height:1.25;
+  color:var(--tinta); font-weight:700;
+}
+.explica__boton{ flex:none; align-self:center; }
+
+/* La pastilla del paso respira mientras Pólya habla: se entiende
+   que la voz sale de ahí, sin añadir ningún icono encima. */
+.pasos-tira__item[data-hablando]{
+  animation:respira 2.2s ease-in-out infinite;
+}
+
+@media (max-width:899px){
+  .explica{ min-height:clamp(150px,26vh,230px); }
+  .punto{ flex:0 1 calc(50% - 8px); }
 }

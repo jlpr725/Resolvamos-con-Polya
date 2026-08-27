@@ -20,18 +20,46 @@ const APP = {
 /* Los cuatro pasos del método, con el enunciado original. */
 const PASOS = [
   { n: 1, nombre: 'Leo y comprendo el problema', icono: 'search', corto: 'Leo',
-    detalle: '¿Qué sé del problema? ¿Qué me preguntan? ¡Saco los DATOS RELEVANTES!',
+    /* Título y puntos tal como estaban en la aplicación de 2019 */
+    titulo: '1. Leer y comprender el problema',
+    puntos: [
+      { icono: 'help',            texto: '¿Qué sé del problema?' },
+      { icono: 'bar_chart',       texto: '¿Distingo los datos relevantes?' },
+      { icono: 'edit',            texto: 'Hago una lista o un dibujo' },
+      { icono: 'contact_support', texto: '¿Qué me preguntan?' }
+    ],
+    voz: 'assets/audio/voces/polya_paso1.mp3',
     guia: 'Busca en el problema los dos números que sí importan. No todos los números sirven.' },
+
   { n: 2, nombre: 'Pienso un plan', icono: 'lightbulb', corto: 'Planeo',
-    detalle: '¿Qué operación realizo para responder la pregunta?',
+    titulo: '2. Trazar un plan',
+    puntos: [
+      { icono: 'lightbulb', texto: '¿Qué debo hacer para responder la pregunta?' }
+    ],
+    voz: 'assets/audio/voces/polya_paso2.mp3',
     guia: '¿Hay que juntar los números o hay que quitar uno del otro?' },
+
   { n: 3, nombre: 'Ejecuto el plan', icono: 'calculate', corto: 'Resuelvo',
-    detalle: '¡Realizo la operación!',
+    titulo: '3. Ejecutar el plan',
+    puntos: [
+      { icono: 'schedule', texto: 'Me tomo un tiempo adecuado' }
+    ],
+    voz: 'assets/audio/voces/polya_paso3.mp3',
     guia: 'Haz la cuenta con calma y elige la respuesta correcta.' },
+
   { n: 4, nombre: 'Vuelvo atrás', icono: 'fact_check', corto: 'Reviso',
-    detalle: 'Reviso los datos y doy la respuesta',
+    titulo: '4. Volver atrás',
+    puntos: [
+      { icono: 'quiz',       texto: '¿Será la solución correcta?' },
+      { icono: 'psychology', texto: '¿Qué hice para llegar a la solución?' },
+      { icono: 'front_hand', texto: 'Respondo la pregunta' }
+    ],
+    voz: 'assets/audio/voces/polya_paso4.mp3',
     guia: 'Comprueba que tu respuesta responde de verdad la pregunta.' }
 ];
+
+/* Título común de la tarjeta de explicación, como en el original */
+const PASOS_TITULO = 'Así resuelvo el problema';
 
 /* ------------------------------------------------------------
    INSTRUCCIONES. Pantalla "Conoce cómo usar la herramienta".
@@ -75,25 +103,8 @@ const INSTRUCCIONES = {
            'puedes intentarlo otra vez. Equivocarse también es aprender.'
 };
 
-const AYUDA = {
-  intro: 'Bienvenido al menú de ayuda, aquí encontrarás la información ' +
-         'necesaria para poder navegar sobre esta aplicación.',
-  items: [
-    { icono: '📖', texto: 'Elige uno de los dos cuentos para empezar a resolver problemas.' },
-    { icono: '🔢', texto: 'Cada cuento tiene cinco escenas con un problema para resolver.' },
-    { icono: '🧠', texto: 'Pólya te acompaña en los cuatro pasos: leer, planear, resolver y revisar.' },
-    { icono: '⭐', texto: 'Ganas estrellas cuando resuelves un problema. ¡Consíguelas todas!' },
-    { icono: '🔊', texto: 'Toca el altavoz para escuchar el cuento narrado.' },
-    { icono: '📶', texto: 'La aplicación funciona sin internet una vez instalada.' }
-  ]
-};
-
 const SELECTOR_INTRO_NUEVO =
   'Selecciona un cuento, resuelve problemas y gana llaves para abrir el tesoro.';
-
-const SELECTOR_INTRO =
-  'Selecciona el cuento que quieres ver y con la ayuda de Pólya resuelve ' +
-  'los problemas que se les presentan a nuestros lindos personajes.';
 
 /* ------------------------------------------------------------
    DIAPOSITIVAS
@@ -375,17 +386,6 @@ const CUENTOS = [
    const MARTIN_RETRATO = 'assets/img/martin-cara.webp'; */
 const MARTIN_RETRATO = 'assets/img/martin.webp';
 
-const MARTIN = {
-  saludo: '¡Hola! Soy Martín. Te voy a acompañar en esta aventura. ' +
-          'Vamos a viajar por dos cuentos y a resolver los problemas que ' +
-          'aparezcan en el camino. ¿Empezamos?',
-  antesCuento: 'Escucha con atención, que aquí empieza la historia.',
-  antesProblema: 'Aquí es donde necesitamos tu ayuda. Mira bien lo que pasó.',
-  llamaPolya: 'Este problema está difícil… ¡Llamemos al profesor Pólya!',
-  volverMapa: 'Sigamos el camino, nos falta una parte del cuento.',
-  finCuento: '¡Lo lograste! Terminamos este cuento completo.'
-};
-
 const POLYA_ASESOR = {
   presentacion: 'Mucho gusto, yo soy George Pólya. Todo problema de ' +
                 'matemáticas se puede resolver si sigues cuatro pasos ' +
@@ -464,7 +464,6 @@ const VOCES = {
 
 /* Cada parte del cuento tiene 4 pasos y cada paso da 1 llave:
    4 pasos × 5 partes = 20 llaves por cuento. */
-const LLAVES_POR_PARTE = 4;
 const LLAVES_POR_CUENTO = 20;
 
 const MEDALLAS = [
@@ -475,7 +474,7 @@ const MEDALLAS = [
   { id: 'maestro',   icono: 'workspace_premium', nombre: 'Maestro Pólya', desc: 'Reuniste las 40 llaves de los dos cuentos' }
 ];
 
-window.DATOS = { APP, PASOS, AYUDA, INSTRUCCIONES, SELECTOR_INTRO, SELECTOR_INTRO_NUEVO, CUENTOS, VOCES,
+window.DATOS = { APP, PASOS, PASOS_TITULO, INSTRUCCIONES, SELECTOR_INTRO_NUEVO, CUENTOS, VOCES,
                  SLIDES_POR_DEFECTO,
-                 VOCES_COMPLETAS, MEDALLAS, MARTIN, MARTIN_RETRATO, POLYA_ASESOR,
-                 LLAVES_POR_PARTE, LLAVES_POR_CUENTO };
+                 VOCES_COMPLETAS, MEDALLAS, MARTIN_RETRATO, POLYA_ASESOR,
+                 LLAVES_POR_CUENTO };

@@ -25,7 +25,8 @@ var modalCaja = document.getElementById('modalCaja');
 var IMG = 'assets/img/';
 var est = { pantalla:'portada', cuento:null, parte:null, bloque:0,
             paso:1, fallos:0, limpios:0, falloPaso:false,
-            avisoListo:false };   // el aviso «llamemos a Pólya» ya se puede mostrar
+            avisoListo:false,
+            explicando:false };   // mostrando la tarjeta del paso   // el aviso «llamemos a Pólya» ya se puede mostrar
 var regreso = null;      // a dónde volver al cerrar las instrucciones
 var slider  = null;      // temporizador del carrusel de imágenes
 
@@ -255,7 +256,6 @@ function chrome(op){
   btnPolya.dataset.activo = op.polyaActivo ? '1' : '0';
   pieFijo.hidden = !op.pie;
   btnAtras.hidden = !op.atras;
-  SND.ambiente(!!op.musicaFuerte);
   if (SND.alCambiarEstado) SND.alCambiarEstado();
 }
 
@@ -291,8 +291,7 @@ function transicion(dibujar){
    ============================================================ */
 function verPortada(){
   SND.pararVoz(); pararSlider(); pararAutoScroll(); est.pantalla='portada'; est.cuento=null;
-  chrome({ musicaFuerte:true });
-  SND.iniciarMusica();
+  chrome({});
   pintar(
     '<div class="portada">' +
       '<img class="portada__logo" src="'+IMG+'logo.webp" alt="Resolvamos con Pólya">' +
@@ -326,7 +325,7 @@ function verInstrucciones(desde){
   }
   SND.pararVoz(); pararSlider(); pararAutoScroll();
   est.pantalla='instrucciones';
-  chrome({ cabecera:true, logo:true, titulo:'Cómo se usa', pie:true, atras:true, musicaFuerte:true });
+  chrome({ cabecera:true, logo:true, titulo:'Cómo se usa', pie:true, atras:true });
   var I = D.INSTRUCCIONES;
 
   /* Punto 12: el saludo de Martín encabeza la pantalla y trae su
@@ -397,7 +396,7 @@ function pintarVozAyuda(){
    ============================================================ */
 function verCuentos(){
   SND.pararVoz(); pararSlider(); pararAutoScroll(); est.pantalla='cuentos'; est.cuento=null;
-  chrome({ cabecera:true, logo:true, llaves:true, pie:true, atras:true, musicaFuerte:true });
+  chrome({ cabecera:true, logo:true, llaves:true, pie:true, atras:true });
   cabLogo.hidden = true;
 
   var h = '<div style="text-align:center;margin-bottom:clamp(8px,1.6vh,18px)">' +
@@ -466,7 +465,7 @@ function bloquesDe(e){
 function empezarParte(id, n){
   est.cuento=id; est.parte=n; est.bloque=0;
   est.paso=1; est.fallos=0; est.limpios=0; est.falloPaso=false;
-  est.avisoListo=false; est.cierreSonado=false;
+  est.avisoListo=false; est.cierreSonado=false; est.explicando=false;
   verNarracion();
 }
 
@@ -542,25 +541,30 @@ function moverBloque(d){
    ============================================================ */
 function abrirPolya(){
   SND.pararVoz(); pararSlider(); pararAutoScroll();
-  var h = '<div class="polya-modal">' +
-    '<img class="polya-modal__figura" src="'+IMG+'polya.webp" alt="Profesor Pólya">' +
-    '<div>' +
-      '<p class="globo" id="modalTitulo">'+esc(D.POLYA_ASESOR.presentacion)+'</p>';
-  D.PASOS.forEach(function(p){
-    h += '<div class="paso-fila">' +
-      '<span class="paso-fila__icono">'+icono(p.icono)+'</span>' +
-      '<p class="paso-fila__texto"><b>'+p.n+'. '+esc(p.nombre)+':</b> '+esc(p.detalle)+'</p>' +
-      '</div>';
-  });
-  h += '<div class="acciones">' +
-      '<button class="btn btn--claro" id="btnOirPolya">' +
-        '<span class="material-symbols-rounded" id="iconoOirPolya">play_arrow</span>' +
-        '<span id="textoOirPolya">Escuchar</span></button>' +
-      '<button class="btn" id="btnResolver">Vamos a resolverlo '+icono('arrow_forward')+'</button>' +
-    '</div></div></div>';
-  modalCaja.innerHTML = h;
+
+  /* Tarjeta de presentación: figura, nombre, lo que dice y los dos
+     botones. Los cuatro pasos ya no se listan aquí: cada uno se
+     explica en su momento, justo antes de resolverlo. */
+  modalCaja.innerHTML =
+    '<div class="polya-modal">' +
+      '<img class="polya-modal__figura" src="'+IMG+'polya.webp" alt="Profesor Pólya">' +
+      '<div class="polya-modal__lado">' +
+        '<h2 class="polya-modal__nombre" id="modalTitulo">George Pólya</h2>' +
+        '<p class="globo">'+esc(D.POLYA_ASESOR.presentacion)+'</p>' +
+        '<div class="acciones">' +
+          '<button class="btn btn--claro" id="btnOirPolya">' +
+            '<span class="material-symbols-rounded" id="iconoOirPolya">play_arrow</span>' +
+            '<span id="textoOirPolya">Escuchar</span></button>' +
+          '<button class="btn" id="btnResolver">Vamos a resolverlo '+icono('arrow_forward')+'</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   modal.hidden = false;
+
+  /* Su voz arranca sola al llamarlo: el niño no tiene que buscar el botón. */
+  if (SND.activo) SND.reproducirVoz(D.VOCES_COMPLETAS.polya);
 }
+
 function cerrarModal(){ modal.hidden = true; SND.pararVoz(); pararSlider(); pararAutoScroll(); }
 
 /* ============================================================
@@ -570,15 +574,17 @@ function verPaso(){
   est.pantalla='reto';
   var c = cuentoPorId(est.cuento), e = parteActual();
   if(!e) return verCapitulos(est.cuento);
+  var p = D.PASOS[est.paso-1];
+
   chrome({ cabecera:true, logo:true, titulo:c.titulo,
-           sub:'Capítulo '+est.parte+' · Paso '+est.paso+' de 4 · '+D.PASOS[est.paso-1].nombre,
+           sub:'Capítulo '+est.parte+' · Paso '+est.paso+' de 4 · '+p.nombre,
            llaves:true, pie:true, atras:true });
 
-  var tira = '<div class="pasos-tira">' + D.PASOS.map(function(p){
-      var a = p.n===est.paso ? ' data-activo="1"' : (p.n<est.paso ? ' data-hecho="1"' : '');
-      return '<div class="pasos-tira__item"'+a+' title="'+esc(p.nombre)+'">' +
-             icono(p.icono)+'<span>'+esc(p.corto)+'</span></div>';
-    }).join('') + '</div>';
+  /* Antes de que el niño pueda tocar nada, Pólya explica el paso.
+     Es la tarjeta «Así resuelvo el problema» del original. */
+  if (est.explicando) return explicarPaso(e, p);
+
+  var tira = tiraDePasos();
 
   /* --- Lo que va DENTRO del panel: solo pasos y enunciado --- */
   var panel = '', fuera = '';
@@ -665,6 +671,49 @@ function verPaso(){
     '</div>');
 }
 
+/* La tira de pastillas de siempre. Con `hablando`, la pastilla del
+   paso actual respira: da la sensación de que Pólya habla a través
+   de ella, sin añadir ningún elemento extra. */
+function tiraDePasos(hablando){
+  return '<div class="pasos-tira">' + D.PASOS.map(function(p){
+    var estado = p.n===est.paso ? ' data-activo="1"'
+               : (p.n<est.paso ? ' data-hecho="1"' : '');
+    if (hablando && p.n===est.paso) estado += ' data-hablando="1"';
+    return '<div class="pasos-tira__item"'+estado+' title="'+esc(p.nombre)+'">' +
+           icono(p.icono) + '<span>'+esc(p.corto)+'</span></div>';
+  }).join('') + '</div>';
+}
+
+/* Tarjeta de explicación del paso, con la voz de Pólya. */
+function explicarPaso(e, p){
+  var puntos = (p.puntos || []).map(function(x){
+    return '<li class="punto">' +
+             '<span class="punto__icono">'+icono(x.icono)+'</span>' +
+             '<span class="punto__texto">'+esc(x.texto)+'</span>' +
+           '</li>';
+  }).join('');
+
+  /* Misma estructura de dos columnas que el resto del ejercicio:
+     la ilustración a la izquierda y, a la derecha, las pastillas
+     con la explicación debajo. */
+  pintar(
+    '<div class="reto">' +
+      '<div class="reto__ilustracion"><img src="'+e.arte+'" alt=""></div>' +
+      '<div class="reto__panel reto__panel--explica">' +
+        tiraDePasos(true) +
+        '<div class="explica">' +
+          '<h2 class="explica__titulo">'+esc(D.PASOS_TITULO)+'</h2>' +
+          '<p class="explica__paso">'+esc(p.titulo)+'</p>' +
+          '<ul class="explica__puntos">'+puntos+'</ul>' +
+        '</div>' +
+        '<button class="btn btn--verde explica__boton" id="btnEmpezarPaso">' +
+          'Continuar '+icono('arrow_forward')+'</button>' +
+      '</div>' +
+    '</div>');
+
+  if (SND.activo && p.voz) SND.reproducirVoz(p.voz);
+}
+
 /* ============================================================
    RETROALIMENTACIÓN
    Nunca se dice solo "está mal": se explica en qué fijarse.
@@ -672,22 +721,19 @@ function verPaso(){
    docente pueda comentarlo, con una barra que muestra cuánto
    falta y un botón para seguir antes si ya se entendió.
    ============================================================ */
-var ESPERA = { bien: 7000, pista: 9000 };   // milisegundos; ajustables
-var temporizador = null;
+/* El avance entre pasos es siempre manual: el niño (o el docente)
+   decide cuándo seguir con el botón Continuar. */
 
 function pista(tipo, texto, alSeguir){
   var caja = document.getElementById('pista'); if(!caja) return;
-  var espera = ESPERA[tipo] || 7000;
-  var cara = tipo==='bien' ? IMG+'avance-llamada.webp' : IMG+'avance-llamada.webp';
 
   caja.innerHTML =
     '<div class="pista" data-tipo="'+tipo+'">' +
-      '<img class="pista__cara" src="'+cara+'" alt="">' +
+      '<img class="pista__cara" src="'+IMG+'avance-llamada.webp" alt="">' +
       '<div class="pista__cuerpo">' +
         '<p>'+texto+'</p>' +
         (alSeguir
           ? '<div class="pista__seguir">' +
-              '<span class="pista__barra"><i id="pistaBarra"></i></span>' +
               '<button class="btn btn--pequeno" id="btnSeguir">Continuar '+
                 icono('arrow_forward')+'</button>' +
             '</div>'
@@ -695,24 +741,12 @@ function pista(tipo, texto, alSeguir){
       '</div>' +
     '</div>';
 
-  if (!alSeguir) return;
-
-  var barra = document.getElementById('pistaBarra');
-  if (barra) requestAnimationFrame(function(){
-    barra.style.transitionDuration = espera + 'ms';
-    barra.style.width = '100%';
-  });
-
-  if (temporizador) clearTimeout(temporizador);
-  temporizador = setTimeout(function(){ seguirAhora(alSeguir); }, espera);
-  caja.dataset.seguir = '1';
-  caja._seguir = alSeguir;
+  if (alSeguir) caja._seguir = alSeguir;
 }
 
 function seguirAhora(fn){
-  if (temporizador) { clearTimeout(temporizador); temporizador = null; }
   var caja = document.getElementById('pista');
-  if (caja) { delete caja.dataset.seguir; caja._seguir = null; }
+  if (caja) caja._seguir = null;
   fn();
 }
 
@@ -730,6 +764,7 @@ function pasarDePaso(){
   est.falloPaso = false;
   est.paso++;
   if (est.paso>4) return festejar();
+  est.explicando = true;    /* el siguiente paso vuelve a explicarse */
   verPaso();
 }
 
@@ -855,7 +890,9 @@ function atras(){
     case 'capitulos':     return verCuentos();
     case 'narracion':     return verCapitulos(est.cuento);
     case 'reto':
-      if (est.paso>1){ est.paso--; return verPaso(); }
+      if (est.explicando && est.paso===1){ est.explicando=false; return verNarracion(); }
+      if (est.explicando){ est.explicando=false; return verPaso(); }
+      if (est.paso>1){ est.paso--; est.explicando=true; return verPaso(); }
       return verNarracion();
     default: return verPortada();
   }
@@ -893,6 +930,12 @@ document.addEventListener('click', function(ev){
     if (SND.voz){ SND.reanudarVoz(); return pintarVozAyuda(); }
     return reproducirVozAyuda();
   }
+  if (t.closest('#btnEmpezarPaso')){
+    SND.pararVoz();
+    est.explicando = false;
+    pitido('clic');
+    return verPaso();
+  }
   if (t.closest('#btnSeguir')){
     var cj = document.getElementById('pista');
     if (cj && cj._seguir) return seguirAhora(cj._seguir);
@@ -902,7 +945,7 @@ document.addEventListener('click', function(ev){
   if (t.closest('#btnNext')) return moverBloque(1);
   if (t.closest('#btnPlay')) return alternarNarracion();
   if (t.closest('#btnOirPolya')) return alternarVozSimple(D.VOCES_COMPLETAS.polya);
-  if (t.closest('#btnResolver')){ cerrarModal(); est.paso=1; return verPaso(); }
+  if (t.closest('#btnResolver')){ cerrarModal(); est.paso=1; est.explicando=true; return verPaso(); }
 
   /* --- Paso 1: los datos --- */
   var f = t.closest('[data-num]');
@@ -1075,7 +1118,6 @@ function arrancar(){
     setTimeout(function(){
       if (splash) splash.dataset.listo = '1';
       verPortada();
-      SND.iniciarMusica();
       if (SND.activo && D.VOCES_COMPLETAS.bienvenida){
         setTimeout(function(){
           SND.reproducirVoz(D.VOCES_COMPLETAS.bienvenida);
