@@ -610,12 +610,12 @@ function verPaso(){
     fuera = '<p class="pregunta">¿Qué operación vas a realizar?</p>' +
       '<div class="opciones opciones--par">' +
         '<button class="opcion opcion--plan" data-plan="suma"><span class="opcion__letra">+</span>' +
-          '<span class="opcion__cuerpo">Juntar los dos números' +
+          '<span class="opcion__cuerpo">Juntar las dos cantidades' +
           '<small>los reúno para saber cuántos hay en total</small>' +
           G.miniPlan(e,'suma') + '</span></button>' +
         '<button class="opcion opcion--plan" data-plan="resta"><span class="opcion__letra">−</span>' +
-          '<span class="opcion__cuerpo">Quitar un número del otro' +
-          '<small>los comparo o separo una parte</small>' +
+          '<span class="opcion__cuerpo">Debes quitar una cantidad de otra.' +
+          '<small>tienes una cantidad y necesitas quitar una parte</small>' +
           G.miniPlan(e,'resta') + '</span></button>' +
       '</div>';
   }
