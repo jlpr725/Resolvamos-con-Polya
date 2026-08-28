@@ -1168,13 +1168,13 @@ body{
   gap:clamp(6px,1.2vh,12px);
 }
 .explica__titulo{
-  margin:0; font-family:var(--titulo); font-weight:600; color:var(--tinta);
-  font-size:clamp(1.05rem,2.8vh,1.7rem); line-height:1.2;
+  margin:0; font-family:var(--titulo); font-weight:400; color:var(--tinta);
+  font-size:clamp(1.05rem,1.5vh,1.7rem); line-height:1.2;
 }
 .explica__paso{
   margin:0 0 clamp(4px,1vh,10px);
-  font-family:var(--titulo); font-weight:500; color:var(--naranja-txt);
-  font-size:clamp(.85rem,2vh,1.2rem); line-height:1.25;
+  font-family:var(--titulo); font-weight:600; color:var(--naranja-txt);
+  font-size:clamp(.85rem,6vh,1.5rem); line-height:1.25;
 }
 .explica__puntos{
   list-style:none; margin:0; padding:0; width:100%;
