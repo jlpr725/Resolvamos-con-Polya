@@ -60,8 +60,14 @@
     porcentaje: function (cuento, n) { return this.dePart(cuento, n).porcentaje; },
     llavesDeParte: function (cuento, n) { return this.dePart(cuento, n).llaves; },
 
-    /* La parte 1 siempre está abierta; las demás, al terminar la anterior. */
+    /* ------------------------------------------------------------
+       Todos los capítulos abiertos desde el principio, para que el
+       docente pueda entrar directo al que necesite.
+       Pon PROGRESIVO en true para volver al avance encadenado.
+       ------------------------------------------------------------ */
     desbloqueada: function (cuento, n) {
+      var PROGRESIVO = false;
+      if (!PROGRESIVO) return true;
       return n === 1 || this.dePart(cuento, n - 1).terminada;
     },
 

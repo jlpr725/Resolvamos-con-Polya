@@ -7,66 +7,68 @@
 (function () {
 'use strict';
 
-var D = window.DATOS, P = window.PROGRESO, G = window.GRAFICOS;
-var vista     = document.getElementById('vista');
-var cabecera  = document.getElementById('cabecera');
-var cabLogo   = document.getElementById('cabeceraLogo');
-var titulo    = document.getElementById('tituloVista');
-var subtitulo = document.getElementById('subVista');
-var contador  = document.getElementById('contador');
-var totalLl   = document.getElementById('totalLlaves');
-var btnPolya  = document.getElementById('btnPolya');
-var pieFijo   = document.getElementById('pieFijo');
-var btnAtras  = document.getElementById('btnAtras');
-var btnInfo   = document.getElementById('btnInfo');
-var modal     = document.getElementById('modal');
-var modalCaja = document.getElementById('modalCaja');
+let D = window.DATOS, P = window.PROGRESO, G = window.GRAFICOS, SND = window.SONIDO;
+let vista     = document.getElementById('vista');
+let cabecera  = document.getElementById('cabecera');
+let cabLogo   = document.getElementById('cabeceraLogo');
+let titulo    = document.getElementById('tituloVista');
+let subtitulo = document.getElementById('subVista');
+let contador  = document.getElementById('contador');
+let totalLl   = document.getElementById('totalLlaves');
+let btnPolya  = document.getElementById('btnPolya');
+let pieFijo   = document.getElementById('pieFijo');
+let btnAtras  = document.getElementById('btnAtras');
+let btnInfo   = document.getElementById('btnInfo');
+let modal     = document.getElementById('modal');
+let modalCaja = document.getElementById('modalCaja');
 
-var IMG = 'assets/img/';
-var est = { pantalla:'portada', cuento:null, parte:null, bloque:0,
+let IMG = 'assets/img/';
+let regreso = null;      // a dónde volver al cerrar las instrucciones
+let slider  = null;      // temporizador del carrusel de imágenes
+
+/* Estado de la sesión: dónde está el niño y cómo va el capítulo. */
+let est = { pantalla:'portada', cuento:null, parte:null, bloque:0,
             paso:1, fallos:0, limpios:0, falloPaso:false,
-            avisoListo:false,
-            explicando:false };   // mostrando la tarjeta del paso   // el aviso «llamemos a Pólya» ya se puede mostrar
-var regreso = null;      // a dónde volver al cerrar las instrucciones
-var slider  = null;      // temporizador del carrusel de imágenes
+            avisoListo:false,      // el aviso «llamemos a Pólya» ya se puede mostrar
+            explicando:false,      // mostrando la tarjeta del paso
+            cierreSonado:false };  // el desenlace del cuento ya sonó
 
 function esc(s){ return String(s).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function icono(n){ return '<span class="material-symbols-rounded">' + n + '</span>'; }
 function cuentoPorId(id){
-  for (var i=0;i<D.CUENTOS.length;i++) if (D.CUENTOS[i].id===id) return D.CUENTOS[i];
+  for (let i=0;i<D.CUENTOS.length;i++) if (D.CUENTOS[i].id===id) return D.CUENTOS[i];
   return null;
 }
 function parteActual(){
-  var c = cuentoPorId(est.cuento); if (!c) return null;
-  for (var i=0;i<c.escenas.length;i++) if (c.escenas[i].n===est.parte) return c.escenas[i];
+  let c = cuentoPorId(est.cuento); if (!c) return null;
+  for (let i=0;i<c.escenas.length;i++) if (c.escenas[i].n===est.parte) return c.escenas[i];
   return null;
 }
 function mezclar(a){
   a=a.slice();
-  for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  for (let i=a.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); let t=a[i]; a[i]=a[j]; a[j]=t; }
   return a;
 }
 
 /* ---------------- Audio ---------------- */
-var SND = window.SONIDO;
-var pitido = function (t) { SND.pitido(t); };
+let pitido = function (t) { SND.pitido(t); };
 
 SND.alCambiarEstado = function () {
-  var sonando = SND.hablando();
-  var b = document.getElementById('btnPlay');
+  let sonando = SND.hablando();
+  let b = document.getElementById('btnPlay');
   if (b) {
-    var i = b.querySelector('.material-symbols-rounded');
+    let i = b.querySelector('.material-symbols-rounded');
     if (i) i.textContent = sonando ? 'pause' : 'play_arrow';
     b.setAttribute('aria-label', sonando ? 'Pausar la narración' : 'Escuchar la narración');
   }
-  var ia = document.getElementById('iconoVozAyuda');
+  let ia = document.getElementById('iconoVozAyuda');
   if (ia) ia.textContent = sonando ? 'pause' : 'play_arrow';
-  var ta = document.getElementById('textoVozAyuda');
+  let ta = document.getElementById('textoVozAyuda');
   if (ta) ta.textContent = sonando ? 'Pausar' : 'Escuchar a Martín';
-  var ip = document.getElementById('iconoOirPolya');
+  let ip = document.getElementById('iconoOirPolya');
   if (ip) ip.textContent = sonando ? 'pause' : 'play_arrow';
-  var tp = document.getElementById('textoOirPolya');
+  let tp = document.getElementById('textoOirPolya');
   if (tp) tp.textContent = sonando ? 'Pausar' : 'Escuchar';
 };
 
@@ -77,10 +79,10 @@ function rutaVoz(tipo){
 function tipoBloque(){ return est.bloque === 0 ? 'narracion' : 'problema'; }
 
 function confeti(){
-  var cols=['#e06b38','#f5b731','#4f9d69','#d94f4f','#5b8fd4'];
-  var caja=document.createElement('div'); caja.className='confeti';
-  for(var i=0;i<48;i++){
-    var s=document.createElement('span');
+  let cols=['#e06b38','#f5b731','#4f9d69','#d94f4f','#5b8fd4'];
+  let caja=document.createElement('div'); caja.className='confeti';
+  for(let i=0;i<48;i++){
+    let s=document.createElement('span');
     s.style.left=Math.random()*100+'%';
     s.style.background=cols[i%cols.length];
     s.style.animationDuration=(1.6+Math.random()*1.4)+'s';
@@ -100,49 +102,44 @@ function confeti(){
    continúa desde ahí: imagen y audio nunca se desincronizan.
    ============================================================ */
 function slidesDe(e, tipo){
-  var propias = e.slides && e.slides[tipo];
+  let propias = e.slides && e.slides[tipo];
   return propias && propias.length ? propias : D.SLIDES_POR_DEFECTO[tipo];
 }
 
 function pararSlider(){
-  if (slider && slider.id) clearTimeout(slider.id);
   slider = null;
 }
 
-function pausarSlider(){
-  if (!slider || slider.pausado) return;
-  clearTimeout(slider.id);
-  slider.restante -= (Date.now() - slider.desde);
-  slider.pausado = true;
-}
-
-function seguirSlider(){
-  if (!slider || !slider.pausado) return;
-  slider.pausado = false;
-  programarSlide(Math.max(slider.restante, 400));
-}
-
-function programarSlide(ms){
-  slider.desde = Date.now();
-  slider.restante = ms;
-  slider.id = setTimeout(function(){
-    slider.i = (slider.i + 1) % slider.lista.length;
+function sincronizarSlider(){
+  if(!slider || !SND.voz) return;
+  let tiempoActual = SND.voz.currentTime;
+  let tiempoAcumulado = 0;
+  let indiceActual = 0;
+  
+  for(let i = 0; i < slider.lista.length; i++) {
+    tiempoAcumulado += slider.lista[i].seg;
+    if (tiempoActual < tiempoAcumulado || i === slider.lista.length - 1) {
+      indiceActual = i;
+      break;
+    }
+  }
+  
+  if (indiceActual !== slider.i) {
+    slider.i = indiceActual;
     mostrarSlide();
-    programarSlide(slider.lista[slider.i].seg * 1000);
-  }, ms);
+  }
 }
 
 function mostrarSlide(){
-  var caja = document.getElementById('lienzoSlide');
+  let caja = document.getElementById('lienzoSlide');
   if (!caja || !slider) return;
   caja.innerHTML = '<img src="'+slider.lista[slider.i].img+'" alt="">';
 }
 
-function arrancarSlider(lista, autoplay){
+function arrancarSlider(lista){
   pararSlider();
-  slider = { lista: lista, i: 0, id: null, desde: 0, restante: 0, pausado: !autoplay };
+  slider = { lista: lista, i: 0 };
   mostrarSlide();
-  if (autoplay && lista.length > 1) programarSlide(lista[0].seg * 1000);
 }
 
 /* La narración manda: al reproducir corre el carrusel, al pausar se detiene. */
@@ -154,25 +151,28 @@ function arrancarSlider(lista, autoplay){
    continuo en vez de tres pasos sueltos.
    ============================================================ */
 function alternarNarracion(){
-  if (SND.hablando()){ SND.pausarVoz(); pausarSlider(); pararAutoScroll(); return; }
-  if (SND.voz){ SND.reanudarVoz(); seguirSlider(); arrancarAutoScroll(); return; }
+  if (SND.hablando()){ SND.pausarVoz(); pararAutoScroll(); return; }
+  if (SND.voz){ SND.reanudarVoz(); arrancarAutoScroll(); return; }
   reproducirBloque();
 }
 
 function reproducirBloque(){
-  var e = parteActual(); if (!e) return;
-  var tipo = tipoBloque();
-  arrancarSlider(slidesDe(e, tipo), true);
+  let e = parteActual(); if (!e) return;
+  let tipo = tipoBloque();
+  arrancarSlider(slidesDe(e, tipo));
   arrancarAutoScroll();
   SND.reproducirVoz(rutaVoz(tipo), alTerminarBloque);
+  if(SND.voz) {
+    SND.voz.addEventListener('timeupdate', sincronizarSlider);
+  }
 }
 
 function alTerminarBloque(){
-  pausarSlider(); pararAutoScroll();
+  pararAutoScroll();
   if (est.pantalla !== 'narracion') return;
 
-  var e = parteActual(); if (!e) return;
-  var ultimo = est.bloque >= bloquesDe(e).length - 1;
+  let e = parteActual(); if (!e) return;
+  let ultimo = est.bloque >= bloquesDe(e).length - 1;
 
   if (!ultimo){
     /* Terminó la historia: pasa solo al problema y sigue narrando. */
@@ -209,10 +209,10 @@ function alternarVozSimple(ruta){
    VELOCIDAD: píxeles por segundo. Súbelo si va lento,
    bájalo si va rápido.
    ============================================================ */
-var VELOCIDAD_TEXTO = 14;      // px por segundo
-var ESPERA_INICIAL   = 2500;   // ms antes de empezar a bajar
+let VELOCIDAD_TEXTO = 14;      // px por segundo
+let ESPERA_INICIAL   = 2500;   // ms antes de empezar a bajar
 
-var autoScroll = { id:null, caja:null, manual:false };
+let autoScroll = { id:null, caja:null, manual:false };
 
 function pararAutoScroll(){
   if (autoScroll.id) cancelAnimationFrame(autoScroll.id);
@@ -221,7 +221,7 @@ function pararAutoScroll(){
 
 function arrancarAutoScroll(){
   pararAutoScroll();
-  var caja = document.getElementById('textoCuento');
+  let caja = document.getElementById('textoCuento');
   if (!caja) return;
   if (caja.scrollHeight <= caja.clientHeight + 4) return;   // cabe entero
   autoScroll.caja = caja;
@@ -229,12 +229,12 @@ function arrancarAutoScroll(){
 
   caja.addEventListener('pointerdown', function(){ autoScroll.manual = true; });
 
-  var inicio = performance.now() + ESPERA_INICIAL;
-  var base = caja.scrollTop;
+  let inicio = performance.now() + ESPERA_INICIAL;
+  let base = caja.scrollTop;
   (function paso(t){
     if (!document.getElementById('textoCuento')) return;
     if (!autoScroll.manual && t > inicio){
-      var avance = (t - inicio) / 1000 * VELOCIDAD_TEXTO;
+      let avance = (t - inicio) / 1000 * VELOCIDAD_TEXTO;
       caja.scrollTop = base + avance;
       if (caja.scrollTop + caja.clientHeight >= caja.scrollHeight - 2) return;
     }
@@ -270,15 +270,15 @@ function pintar(html){
    aviso). El contenido actual se desvanece, se reemplaza mientras
    no se ve, y entra el nuevo. Sin esto el salto es seco.
    ============================================================ */
-var SALIDA = 260;   // milisegundos del desvanecido
+let SALIDA = 260;   // milisegundos del desvanecido
 
 function transicion(dibujar){
-  var caja = vista.firstElementChild;
+  let caja = vista.firstElementChild;
   if (!caja){ dibujar(); return; }
   caja.classList.add('saliendo');
   setTimeout(function(){
     dibujar();
-    var nueva = vista.firstElementChild;
+    let nueva = vista.firstElementChild;
     if (nueva){
       nueva.classList.add('entrando');
       setTimeout(function(){ nueva.classList.remove('entrando'); }, 40);
@@ -310,7 +310,7 @@ function verInstrucciones(desde){
   /* Guarda dónde estaba el usuario: el botón de volver del pie lo devuelve
      exactamente al mismo punto. */
   if (desde !== false && est.pantalla !== 'instrucciones'){
-    var d = JSON.parse(JSON.stringify(est));
+    let d = JSON.parse(JSON.stringify(est));
     regreso = function(){
       est = d;
       switch(d.pantalla){
@@ -326,11 +326,11 @@ function verInstrucciones(desde){
   SND.pararVoz(); pararSlider(); pararAutoScroll();
   est.pantalla='instrucciones';
   chrome({ cabecera:true, logo:true, titulo:'Cómo se usa', pie:true, atras:true });
-  var I = D.INSTRUCCIONES;
+  let I = D.INSTRUCCIONES;
 
   /* Punto 12: el saludo de Martín encabeza la pantalla y trae su
      propio botón de play/pausa. */
-  var h = '<div class="bloque saludo">' +
+  let h = '<div class="bloque saludo">' +
       '<img class="saludo__cara" src="'+(D.MARTIN_RETRATO || IMG+'martin.webp')+'" alt="Martín">' +
       '<div class="saludo__cuerpo">' +
         '<p class="bloque__texto">'+esc(I.consejo)+'</p>' +
@@ -356,7 +356,7 @@ function verInstrucciones(desde){
   h += '<div class="bloque"><h2 class="bloque__titulo">Los botones y qué hacen</h2>' +
        '<div class="iconos-lista">';
   I.iconos.forEach(function(i){
-    var caja = i.icono==='vpn_key'
+    let caja = i.icono==='vpn_key'
       ? '<span class="icono-fila__caja"><img src="'+IMG+'llave.svg" alt=""></span>'
       : i.icono==='inventory_2'
       ? '<span class="icono-fila__caja"><img src="'+IMG+'tesoro.webp" alt=""></span>'
@@ -384,9 +384,9 @@ function reproducirVozAyuda(){
   pintarVozAyuda();
 }
 function pintarVozAyuda(){
-  var i = document.getElementById('iconoVozAyuda');
-  var t = document.getElementById('textoVozAyuda');
-  var sonando = SND.hablando();
+  let i = document.getElementById('iconoVozAyuda');
+  let t = document.getElementById('textoVozAyuda');
+  let sonando = SND.hablando();
   if (i) i.textContent = sonando ? 'pause' : 'play_arrow';
   if (t) t.textContent = sonando ? 'Pausar' : 'Escuchar a Martín';
 }
@@ -399,13 +399,13 @@ function verCuentos(){
   chrome({ cabecera:true, logo:true, llaves:true, pie:true, atras:true });
   cabLogo.hidden = true;
 
-  var h = '<div style="text-align:center;margin-bottom:clamp(8px,1.6vh,18px)">' +
+  let h = '<div style="text-align:center;margin-bottom:clamp(8px,1.6vh,18px)">' +
       '<img src="'+IMG+'logo.webp" alt="Ir a la portada" class="logo-enlace" data-ir="portada" ' +
       'style="width:clamp(110px,18vh,230px)"></div>' +
     '<p class="intro">'+esc(D.SELECTOR_INTRO_NUEVO)+'</p>' +
     '<div class="cuentos">';
   D.CUENTOS.forEach(function(c){
-    var hechas = P.partesTerminadas(c.id);
+    let hechas = P.partesTerminadas(c.id);
     h += '<button class="cuento" data-cuento="'+c.id+'">' +
       '<span class="cuento__marco"><img src="'+c.portada+'" alt=""></span>' +
       '<span class="cuento__nombre">'+esc(c.titulo)+'</span>' +
@@ -423,12 +423,12 @@ function verCuentos(){
 function verCapitulos(id, animar){
   SND.pararVoz(); pararSlider(); pararAutoScroll();
   est.pantalla='capitulos'; est.cuento=id;
-  var c = cuentoPorId(id); if(!c) return verCuentos();
+  let c = cuentoPorId(id); if(!c) return verCuentos();
   chrome({ cabecera:true, llaves:true, pie:true, atras:true });
 
-  var llaves = P.llavesDeCuento(id), tope = D.LLAVES_POR_CUENTO;
+  let llaves = P.llavesDeCuento(id), tope = D.LLAVES_POR_CUENTO;
 
-  var h = '<div style="text-align:center;margin-bottom:clamp(6px,1.2vh,14px)">' +
+  let h = '<div style="text-align:center;margin-bottom:clamp(6px,1.2vh,14px)">' +
       '<img src="'+IMG+'logo.webp" alt="Ir a la portada" class="logo-enlace" data-ir="portada" ' +
       'style="width:clamp(90px,15vh,190px)"></div>' +
     '<h2 class="titulo-cuento">'+esc(c.titulo)+'</h2>' +
@@ -437,8 +437,8 @@ function verCapitulos(id, animar){
     '<div class="capitulos">';
 
   c.escenas.forEach(function(e){
-    var libre = P.desbloqueada(id, e.n);
-    var p = P.porcentaje(id, e.n);
+    let libre = P.desbloqueada(id, e.n);
+    let p = P.porcentaje(id, e.n);
     h += '<button class="capitulo" data-parte="'+e.n+'"'+(libre?'':' data-bloqueado="1"')+
       ' aria-label="Capítulo '+e.n+': '+esc(e.rotulo)+
       (libre ? ', '+p+' por ciento completado' : ', bloqueado')+'">' +
@@ -471,21 +471,21 @@ function empezarParte(id, n){
 
 function verNarracion(){
   est.pantalla='narracion';
-  var c = cuentoPorId(est.cuento), e = parteActual();
+  let c = cuentoPorId(est.cuento), e = parteActual();
   if(!e) return verCapitulos(est.cuento);
-  var bl = bloquesDe(e), b = bl[est.bloque];
-  var ultimo = est.bloque === bl.length-1;
+  let bl = bloquesDe(e), b = bl[est.bloque];
+  let ultimo = est.bloque === bl.length-1;
 
   chrome({ cabecera:true, logo:true, titulo:c.titulo,
            sub:e.rotulo+' – Capítulo '+e.n, llaves:true,
            polya:true, polyaActivo:est.avisoListo, pie:true, atras:true });
 
-  var texto = esc(b.texto);
+  let texto = esc(b.texto);
   if (b.destacar) texto = texto.replace(esc(b.destacar), '<b>'+esc(b.destacar)+'</b>');
 
   /* El aviso de Pólya sale del globo: así el globo se ajusta al texto
      y el aviso puede colocarse donde estorbe menos. */
-  var avisoPolya = est.avisoListo
+  let avisoPolya = est.avisoListo
     ? '<div class="aviso-polya">' +
         '<img src="'+IMG+'avance-llamada.webp" alt="">' +
         '<p><b>¡Ya conocemos el problema!</b> Vamos a llamar al profesor Pólya. ' +
@@ -522,9 +522,9 @@ function verNarracion(){
 }
 
 function moverBloque(d){
-  var e = parteActual(); if(!e) return;
-  var bl = bloquesDe(e);
-  var n = est.bloque + d;
+  let e = parteActual(); if(!e) return;
+  let bl = bloquesDe(e);
+  let n = est.bloque + d;
   if (n<0 || n>=bl.length) return;
   SND.pararVoz(); pararSlider(); pararAutoScroll();
   est.bloque = n;
@@ -572,9 +572,9 @@ function cerrarModal(){ modal.hidden = true; SND.pararVoz(); pararSlider(); para
    ============================================================ */
 function verPaso(){
   est.pantalla='reto';
-  var c = cuentoPorId(est.cuento), e = parteActual();
+  let c = cuentoPorId(est.cuento), e = parteActual();
   if(!e) return verCapitulos(est.cuento);
-  var p = D.PASOS[est.paso-1];
+  let p = D.PASOS[est.paso-1];
 
   chrome({ cabecera:true, logo:true, titulo:c.titulo,
            sub:'Capítulo '+est.parte+' · Paso '+est.paso+' de 4 · '+p.nombre,
@@ -584,15 +584,15 @@ function verPaso(){
      Es la tarjeta «Así resuelvo el problema» del original. */
   if (est.explicando) return explicarPaso(e, p);
 
-  var tira = tiraDePasos();
+  let tira = tiraDePasos();
 
   /* --- Lo que va DENTRO del panel: solo pasos y enunciado --- */
-  var panel = '', fuera = '';
+  let panel = '', fuera = '';
 
   if (est.paso===1){
     panel = '<p class="rotulo">El problema</p>' +
             '<p class="enunciado">'+esc(e.problema)+'</p>';
-    var opciones = mezclar(
+    let opciones = mezclar(
       e.datos.map(function(d){ return { v:d.v, e:d.e, bueno:1 }; })
         .concat(e.distractores.map(function(d){ return { v:d.v, e:d.e, bueno:0 }; })));
     fuera = '<p class="pregunta">¿Cuáles son los datos que sí importan?</p>' +
@@ -650,7 +650,7 @@ function verPaso(){
   /* En el último capítulo, el paso 4 es también el desenlace del cuento:
      ahí suena el cierre antes de pasar a la celebración. */
   if (est.paso === 4){
-    var cierre = D.VOCES[est.cuento+':'+est.parte+':cierre'];
+    let cierre = D.VOCES[est.cuento+':'+est.parte+':cierre'];
     if (cierre && SND.activo && !est.cierreSonado){
       est.cierreSonado = true;
       setTimeout(function(){
@@ -676,7 +676,7 @@ function verPaso(){
    de ella, sin añadir ningún elemento extra. */
 function tiraDePasos(hablando){
   return '<div class="pasos-tira">' + D.PASOS.map(function(p){
-    var estado = p.n===est.paso ? ' data-activo="1"'
+    let estado = p.n===est.paso ? ' data-activo="1"'
                : (p.n<est.paso ? ' data-hecho="1"' : '');
     if (hablando && p.n===est.paso) estado += ' data-hablando="1"';
     return '<div class="pasos-tira__item"'+estado+' title="'+esc(p.nombre)+'">' +
@@ -686,7 +686,7 @@ function tiraDePasos(hablando){
 
 /* Tarjeta de explicación del paso, con la voz de Pólya. */
 function explicarPaso(e, p){
-  var puntos = (p.puntos || []).map(function(x){
+  let puntos = (p.puntos || []).map(function(x){
     return '<li class="punto">' +
              '<span class="punto__icono">'+icono(x.icono)+'</span>' +
              '<span class="punto__texto">'+esc(x.texto)+'</span>' +
@@ -711,7 +711,14 @@ function explicarPaso(e, p){
       '</div>' +
     '</div>');
 
-  if (SND.activo && p.voz) SND.reproducirVoz(p.voz);
+  /* La explicación hablada solo en los dos primeros capítulos de cada
+     cuento: ahí el niño está aprendiendo el método. Después ya lo conoce
+     y volver a escucharlo lo demora. La tarjeta con el texto y los iconos
+     sigue apareciendo siempre, en los cuatro pasos de todos los capítulos. */
+  var CAPITULOS_CON_VOZ = 2;
+  if (SND.activo && p.voz && est.parte <= CAPITULOS_CON_VOZ) {
+    SND.reproducirVoz(p.voz);
+  }
 }
 
 /* ============================================================
@@ -725,7 +732,7 @@ function explicarPaso(e, p){
    decide cuándo seguir con el botón Continuar. */
 
 function pista(tipo, texto, alSeguir){
-  var caja = document.getElementById('pista'); if(!caja) return;
+  let caja = document.getElementById('pista'); if(!caja) return;
 
   caja.innerHTML =
     '<div class="pista" data-tipo="'+tipo+'">' +
@@ -745,15 +752,15 @@ function pista(tipo, texto, alSeguir){
 }
 
 function seguirAhora(fn){
-  var caja = document.getElementById('pista');
+  let caja = document.getElementById('pista');
   if (caja) caja._seguir = null;
   fn();
 }
 
 function llaveGanada(){
-  var caja = document.getElementById('pista'); if(!caja) return;
+  let caja = document.getElementById('pista'); if(!caja) return;
   SND.pitido('llave');
-  var cuerpo = caja.querySelector('.pista__cuerpo') || caja;
+  let cuerpo = caja.querySelector('.pista__cuerpo') || caja;
   cuerpo.insertAdjacentHTML('afterbegin',
     '<div class="llave-premio"><img src="'+IMG+'llave.svg" alt="">¡Ganaste una llave!</div>');
   totalLl.textContent = P.llavesDeCuento(est.cuento) + est.paso;
@@ -772,29 +779,29 @@ function pasarDePaso(){
    8. FESTEJO Y AVANCE
    ============================================================ */
 function festejar(){
-  var c = cuentoPorId(est.cuento), e = parteActual();
-  var nuevas = P.registrar(est.cuento, est.parte, est.limpios);
+  let c = cuentoPorId(est.cuento), e = parteActual();
+  let nuevas = P.registrar(est.cuento, est.parte, est.limpios);
   pitido('bien'); confeti();
 
-  var llaves = '';
-  for (var i=0;i<4;i++) llaves += '<img src="'+IMG+'llave.svg" alt="">';
+  let llaves = '';
+  for (let i=0;i<4;i++) llaves += '<img src="'+IMG+'llave.svg" alt="">';
 
-  var animo = est.limpios===4
+  let animo = est.limpios===4
     ? '¡Perfecto! Resolviste los cuatro pasos sin equivocarte. Pólya estaría muy orgulloso de ti.'
     : est.limpios>=2
     ? '¡Muy bien! Te equivocaste en algún paso, pero volviste a intentarlo y lo lograste. Así se aprende de verdad.'
     : '¡Lo lograste! Al principio costó, pero seguiste los cuatro pasos hasta el final. Eso es lo importante.';
 
-  var ultimo = est.parte === c.escenas.length;
-  var siguiente = ultimo ? null : est.parte + 1;
-  var total = P.llavesDeCuento(est.cuento);
-  var tope  = D.LLAVES_POR_CUENTO;
-  var tesoroAbierto = total >= tope;
+  let ultimo = est.parte === c.escenas.length;
+  let siguiente = ultimo ? null : est.parte + 1;
+  let total = P.llavesDeCuento(est.cuento);
+  let tope  = D.LLAVES_POR_CUENTO;
+  let tesoroAbierto = total >= tope;
 
   chrome({ cabecera:true, logo:true, titulo:'¡Capítulo '+est.parte+' completado!',
            llaves:true, pie:true, atras:true });
 
-  var h = '<div class="festejo">';
+  let h = '<div class="festejo">';
 
   if (tesoroAbierto){
     h += '<h2 class="festejo__titulo">¡Abriste el tesoro!</h2>' +
@@ -817,7 +824,7 @@ function festejar(){
 
   if (nuevas.length){
     nuevas.forEach(function(id){
-      var m = D.MEDALLAS.filter(function(x){return x.id===id;})[0];
+      let m = D.MEDALLAS.filter(function(x){return x.id===id;})[0];
       if(m) h += '<p class="festejo__medalla">'+icono('military_tech')+
         ' <b>Nueva medalla:</b> '+esc(m.nombre)+' — '+esc(m.desc)+'</p>';
     });
@@ -842,7 +849,7 @@ function festejar(){
 
 /* Barra del camino al tesoro, compartida por el festejo y los capítulos. */
 function caminoHTML(llaves, tope, abierto){
-  var pct = Math.round(llaves/tope*100);
+  let pct = Math.round(llaves/tope*100);
   /* La cifra va encima de la barra: cuando Pólya avanzaba por el
      centro tapaba el número y no se leía nada. */
   return '<div class="camino-bloque">' +
@@ -863,13 +870,13 @@ function animarCamino(){
   document.querySelectorAll('[data-w]').forEach(function(el){
     el.style.width = el.dataset.w + '%';
   });
-  var m = document.getElementById('caminoMartin');
-  var pista = document.querySelector('.camino__pista');
-  var rell = document.querySelector('.camino__relleno');
+  let m = document.getElementById('caminoMartin');
+  let pista = document.querySelector('.camino__pista');
+  let rell = document.querySelector('.camino__relleno');
   if (m && pista && rell){
     /* Pólya se mueve dentro de la pista, sin salirse por los extremos. */
-    var pct = Number(rell.dataset.w);
-    var recorrido = pista.offsetWidth - m.offsetWidth;
+    let pct = Number(rell.dataset.w);
+    let recorrido = pista.offsetWidth - m.offsetWidth;
     m.style.left = Math.round(pista.offsetLeft + recorrido * pct / 100) + 'px';
     /* Al llegar al 100 % se esconde tras el cofre: si no, quedaba
        montado sobre él con un leve desfase. */
@@ -884,7 +891,7 @@ function atras(){
   SND.pararVoz(); pararSlider(); pararAutoScroll();
   switch(est.pantalla){
     case 'instrucciones':
-      if (regreso){ var r = regreso; regreso = null; return r(); }
+      if (regreso){ let r = regreso; regreso = null; return r(); }
       return verPortada();
     case 'cuentos':       return verPortada();
     case 'capitulos':     return verCuentos();
@@ -899,12 +906,12 @@ function atras(){
 }
 
 document.addEventListener('click', function(ev){
-  var t = ev.target;
+  let t = ev.target;
 
-  var ir = t.closest('[data-ir]');
+  let ir = t.closest('[data-ir]');
   if (ir){
     pitido('clic');
-    var d = ir.dataset.ir;
+    let d = ir.dataset.ir;
     if (d==='portada')       return verPortada();
     if (d==='cuentos')       return verCuentos();
     if (d==='instrucciones') return verInstrucciones();
@@ -912,17 +919,17 @@ document.addEventListener('click', function(ev){
     return verPortada();
   }
 
-  var bc = t.closest('[data-cuento]');
+  let bc = t.closest('[data-cuento]');
   if (bc){ pitido('clic'); return verCapitulos(bc.dataset.cuento); }
 
-  var bp = t.closest('[data-parte]');
+  let bp = t.closest('[data-parte]');
   if (bp){
     if (bp.dataset.bloqueado){ pitido('mal'); return; }
     pitido('clic');
     return empezarParte(est.cuento, Number(bp.dataset.parte));
   }
 
-  var bs = t.closest('[data-parte-sig]');
+  let bs = t.closest('[data-parte-sig]');
   if (bs){ pitido('clic'); return empezarParte(est.cuento, Number(bs.dataset.parteSig)); }
 
   if (t.closest('#btnVozAyuda')){
@@ -937,7 +944,7 @@ document.addEventListener('click', function(ev){
     return verPaso();
   }
   if (t.closest('#btnSeguir')){
-    var cj = document.getElementById('pista');
+    let cj = document.getElementById('pista');
     if (cj && cj._seguir) return seguirAhora(cj._seguir);
     return;
   }
@@ -948,13 +955,13 @@ document.addEventListener('click', function(ev){
   if (t.closest('#btnResolver')){ cerrarModal(); est.paso=1; est.explicando=true; return verPaso(); }
 
   /* --- Paso 1: los datos --- */
-  var f = t.closest('[data-num]');
+  let f = t.closest('[data-num]');
   if (f){
-    var e1 = parteActual();
+    let e1 = parteActual();
     if (f.dataset.bueno==='1'){
       if (f.dataset.elegida) return;
       f.dataset.elegida='1'; pitido('clic');
-      var ya = document.querySelectorAll('.ficha[data-elegida]').length;
+      let ya = document.querySelectorAll('.ficha[data-elegida]').length;
       if (ya===2){
         pitido('bien');
         pista('bien','<b>¡Esos son!</b> '+e1.datos[0].v+' y '+e1.datos[1].v+
@@ -968,7 +975,7 @@ document.addEventListener('click', function(ev){
       }
     } else {
       f.dataset.mala='1'; est.fallos++; est.falloPaso=true; pitido('mal');
-      var dis = e1.distractores.filter(function(d){ return d.v===Number(f.dataset.num); })[0];
+      let dis = e1.distractores.filter(function(d){ return d.v===Number(f.dataset.num); })[0];
       pista('pista', dis && dis.tipo==='resultado'
         ? 'Cuidado: <b>'+dis.v+' '+esc(dis.e)+'</b> es justo lo que tenemos que ' +
           '<b>averiguar</b>. Todavía no lo sabemos, así que no puede ser un dato. ' +
@@ -981,9 +988,9 @@ document.addEventListener('click', function(ev){
   }
 
   /* --- Paso 2: la operación --- */
-  var pl = t.closest('[data-plan]');
+  let pl = t.closest('[data-plan]');
   if (pl){
-    var e2 = parteActual();
+    let e2 = parteActual();
     if (pl.dataset.plan===e2.operacion){
       pl.dataset.estado='bien'; pitido('bien');
       pista('bien', e2.operacion==='suma'
@@ -1007,9 +1014,9 @@ document.addEventListener('click', function(ev){
   }
 
   /* --- Paso 3: la respuesta --- */
-  var op = t.closest('[data-opcion]');
+  let op = t.closest('[data-opcion]');
   if (op){
-    var e3 = parteActual();
+    let e3 = parteActual();
     if (Number(op.dataset.opcion)===e3.correcta){
       document.querySelectorAll('[data-opcion]').forEach(function(b){ b.disabled=true; });
       op.dataset.estado='bien'; pitido('bien');
@@ -1019,7 +1026,7 @@ document.addEventListener('click', function(ev){
       llaveGanada();
     } else {
       op.dataset.estado='mal'; op.disabled=true; est.fallos++; est.falloPaso=true; pitido('mal');
-      var otra = e3.opciones[1-e3.correcta];
+      let otra = e3.opciones[1-e3.correcta];
       pista('pista','Esa no es. Haz la cuenta <b>'+esc(e3.cuenta)+'</b> con calma: puedes ' +
         'contar con los dedos o dibujar. Vuelve a intentarlo.');
     }
@@ -1027,7 +1034,7 @@ document.addEventListener('click', function(ev){
   }
 
   /* --- Paso 4: revisar --- */
-  var rv = t.closest('[data-revisar]');
+  let rv = t.closest('[data-revisar]');
   if (rv){
     if (rv.dataset.revisar==='1'){
       rv.dataset.estado='bien'; pitido('bien');
@@ -1056,7 +1063,7 @@ document.addEventListener('keydown', function(ev){
 });
 
 /* ---------------- Instalación ---------------- */
-var evtInstalar=null, cajaInstalar=document.getElementById('instalar');
+let evtInstalar=null, cajaInstalar=document.getElementById('instalar');
 window.addEventListener('beforeinstallprompt', function(ev){
   ev.preventDefault(); evtInstalar=ev;
   if(!localStorage.getItem('polya.noInstalar')) cajaInstalar.hidden=false;
@@ -1081,17 +1088,17 @@ if ('serviceWorker' in navigator){
    entra la portada y Martín da la bienvenida.
    ============================================================ */
 function arrancar(){
-  var splash = document.getElementById('splash');
-  var barra  = document.getElementById('splashBarra');
+  let splash = document.getElementById('splash');
+  let barra  = document.getElementById('splashBarra');
 
   /* Cuánto dura como mínimo la pantalla de carga, en milisegundos.
      4000 = 4 segundos. Súbelo o bájalo a gusto. */
-  var DURACION_MINIMA = 4000;
+  let DURACION_MINIMA = 4000;
 
   /* Tope absoluto: pase lo que pase, a los 12 s se entra igual. */
-  var TOPE = 12000;
+  let TOPE = 12000;
 
-  var recursos = [ IMG+'logo.webp', IMG+'martin.webp', IMG+'polya.webp',
+  let recursos = [ IMG+'logo.webp', IMG+'martin.webp', IMG+'polya.webp',
                    IMG+'tesoro.webp', IMG+'cofre_abierto.webp',
                    IMG+'avance-llamada.webp', IMG+'background.webp' ];
   D.CUENTOS.forEach(function(c){
@@ -1099,14 +1106,14 @@ function arrancar(){
     c.escenas.forEach(function(e){ if (e.arte) recursos.push(e.arte); });
   });
 
-  var listos = 0, total = recursos.length, terminado = false;
-  var inicio = Date.now();
+  let listos = 0, total = recursos.length, terminado = false;
+  let inicio = Date.now();
 
   /* Se cuenta igual si la imagen carga o si falla: lo que importa es
      que el intento terminó. Si una imagen faltara, la carga no se
      queda colgada. */
   recursos.forEach(function(ruta){
-    var img = new Image();
+    let img = new Image();
     img.onload = img.onerror = function(){ listos++; };
     img.src = ruta;
   });
@@ -1118,9 +1125,26 @@ function arrancar(){
     setTimeout(function(){
       if (splash) splash.dataset.listo = '1';
       verPortada();
+      /* Los navegadores no dejan sonar nada antes de que el usuario
+         toque la pantalla. Se prueba con un audio mudo: si el navegador
+         lo permite, la bienvenida suena de una vez; si lo rechaza, queda
+         esperando al primer toque (que será el botón Iniciar). */
       if (SND.activo && D.VOCES_COMPLETAS.bienvenida){
-        setTimeout(function(){
+        var bienvenidaDada = false;
+        var darBienvenida = function(){
+          if (bienvenidaDada) return;
+          bienvenidaDada = true;
           SND.reproducirVoz(D.VOCES_COMPLETAS.bienvenida);
+        };
+        setTimeout(function(){
+          var prueba = new Audio(D.VOCES_COMPLETAS.bienvenida);
+          prueba.volume = 0;
+          prueba.play().then(function(){
+            prueba.pause();
+            darBienvenida();
+          }).catch(function(){
+            document.addEventListener('pointerdown', darBienvenida, { once: true });
+          });
         }, 700);
       }
     }, 350);
@@ -1130,10 +1154,10 @@ function arrancar(){
      más lentas. Nunca marca 100 % antes de que todo esté listo. */
   (function pintar(){
     if (terminado) return;
-    var transcurrido = Date.now() - inicio;
-    var porTiempo    = transcurrido / DURACION_MINIMA;
-    var porArchivos  = total ? listos / total : 1;
-    var pct = Math.min(porTiempo, porArchivos, 1);
+    let transcurrido = Date.now() - inicio;
+    let porTiempo    = transcurrido / DURACION_MINIMA;
+    let porArchivos  = total ? listos / total : 1;
+    let pct = Math.min(porTiempo, porArchivos, 1);
 
     if (transcurrido >= TOPE) pct = 1;          // red de seguridad
     if (barra) barra.style.width = (pct*100).toFixed(1) + '%';
@@ -1144,4 +1168,39 @@ function arrancar(){
 }
 
 arrancar();
+
+// Lógica para el PWA Update
+/* Solo tiene sentido con la app publicada en un servidor. Abierta con
+   doble clic (file://) el navegador lo rechaza, así que se omite. */
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Hay una actualización disponible
+          let toast = document.getElementById('toastActualizacion');
+          if(toast) {
+            toast.hidden = false;
+            let btnAct = document.getElementById('btnActualizarApp');
+            if(btnAct) {
+              btnAct.addEventListener('click', () => {
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                toast.hidden = true;
+              });
+            }
+          }
+        }
+      });
+    });
+  });
+
+  let refreshing;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+}
+
 })();
