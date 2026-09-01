@@ -42,7 +42,7 @@ const PASOS = [
   { n: 3, nombre: 'Ejecuto el plan', icono: 'calculate', corto: 'Resuelvo',
     titulo: '3. Ejecutar el plan',
     puntos: [
-      { icono: 'schedule', texto: '¡Realizo la operacion!, me tomo un tiempo adecuado' }
+      { icono: 'schedule', texto: 'Me tomo un tiempo adecuado' }
     ],
     voz: 'assets/audio/voces/polya_paso3.mp3',
     guia: 'Haz la cuenta con calma y elige la respuesta correcta.' },
@@ -51,7 +51,8 @@ const PASOS = [
     titulo: '4. Volver atrás',
     puntos: [
       { icono: 'quiz',       texto: '¿Será la solución correcta?' },
-      { icono: 'front_hand', texto: 'Doy la respuesta' }
+      { icono: 'fact_check', texto: '¿Que hice para llegar a la souclion?' },
+      { icono: 'front_hand', texto: '¿Respondo a la respuesta?' }
     ],
     voz: 'assets/audio/voces/polya_paso4.mp3',
     guia: 'Comprueba que tu respuesta responde de verdad la pregunta.' }

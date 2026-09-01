@@ -542,15 +542,26 @@ function moverBloque(d){
 function abrirPolya(){
   SND.pararVoz(); pararSlider(); pararAutoScroll();
 
-  /* Tarjeta de presentación: figura, nombre, lo que dice y los dos
-     botones. Los cuatro pasos ya no se listan aquí: cada uno se
-     explica en su momento, justo antes de resolverlo. */
+  /* Los cuatro pasos, con su icono y su descripción, tomados de
+     D.PASOS (la misma fuente que usa la tarjeta de explicación de
+     cada paso, para no duplicar el texto en dos sitios). */
+  var filas = D.PASOS.map(function(p){
+    var detalle = (p.puntos || []).map(function(x){ return x.texto; }).join(' ');
+    return '<div class="paso-fila">' +
+             '<span class="paso-fila__icono">'+icono(p.icono)+'</span>' +
+             '<p class="paso-fila__texto"><b>'+p.n+'. '+esc(p.nombre)+':</b> '+esc(detalle)+'</p>' +
+           '</div>';
+  }).join('');
+
+  /* Tarjeta de presentación: figura, nombre, lo que dice, los cuatro
+     pasos y los dos botones. */
   modalCaja.innerHTML =
     '<div class="polya-modal">' +
       '<img class="polya-modal__figura" src="'+IMG+'polya.webp" alt="Profesor Pólya">' +
       '<div class="polya-modal__lado">' +
         '<h2 class="polya-modal__nombre" id="modalTitulo">George Pólya</h2>' +
         '<p class="globo">'+esc(D.POLYA_ASESOR.presentacion)+'</p>' +
+        filas +
         '<div class="acciones">' +
           '<button class="btn btn--claro" id="btnOirPolya">' +
             '<span class="material-symbols-rounded" id="iconoOirPolya">play_arrow</span>' +
