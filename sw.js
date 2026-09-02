@@ -1,16 +1,16 @@
 /* Service worker: la app funciona sin internet una vez instalada. */
-const CACHE = 'polya-v19';
+const CACHE = 'polya-v20';
 
 const ESENCIALES = [
   './', './index.html',
   './css/estilos.css',
   './js/datos.js', './js/graficos.js', './js/sonido.js', './js/progreso.js', './js/app.js',
-  './assets/audio/musica-fondo.mp3',
   './assets/audio/festejo.mp3',
   // Las voces se descargan al vuelo la primera vez que suenan y quedan
   // guardadas. No van aquí para que la app instale rápido aunque falten.
   './manifest.webmanifest',
   './icons/icono-192.png', './icons/icono-512.png',
+  './icons/icono-maskable-512.png', './icons/icono.svg',
   './assets/img/logo.webp', './assets/img/polya.webp', './assets/img/martin.webp',
   './assets/img/background.webp', './assets/img/tesoro.webp',
   './assets/img/avance-llamada.webp',
@@ -18,8 +18,10 @@ const ESENCIALES = [
 
   // Objetos de los problemas
   './assets/img/obj_globo_rojo.webp', './assets/img/obj_globo_azul.webp',
-  './assets/img/obj_invitacion.webp', './assets/img/obj_muneca.webp',
-  './assets/img/obj_invitados.webp',  './assets/img/obj_huevo.webp',
+  './assets/img/obj_invitacion_azul.webp', './assets/img/obj_invitacion_rosa.webp',
+  './assets/img/obj_invitaciones.webp', './assets/img/obj_muneca.webp',
+  './assets/img/obj_muneca_varias.webp', './assets/img/obj_invitados_pocos.webp',
+  './assets/img/obj_invitados_muchos.webp', './assets/img/obj_huevo.webp',
   './assets/img/obj_patico.webp',     './assets/img/obj_patico_naciendo.webp',
 
   // Portadas de los cuentos

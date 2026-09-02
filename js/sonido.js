@@ -33,18 +33,24 @@
          Si el archivo no existe o el navegador bloquea la reproducción,
          `onended` nunca dispararía y la secuencia se quedaría colgada:
          por eso se cierra también ante un error. */
-      function cerrar () {
+      function cerrar (motivo) {
         if (yaCerrado) return;
         yaCerrado = true;
+        /* Un audio que no suena se veía igual que uno que sí: la
+           secuencia avanzaba en silencio y no había forma de notarlo.
+           Ahora queda constancia en la consola. */
+        if (motivo === 'error') {
+          try { console.warn('[Pólya] No se pudo reproducir: ' + ruta); } catch (e) {}
+        }
         self.voz = null;
         if (self.alTerminarVoz) self.alTerminarVoz();
         if (self.alCambiarEstado) self.alCambiarEstado();
       }
 
-      this.voz.onended = cerrar;
-      this.voz.onerror = cerrar;
+      this.voz.onended = function () { cerrar('fin'); };
+      this.voz.onerror = function () { cerrar('error'); };
 
-      this.voz.play().catch(function () { cerrar(); });
+      this.voz.play().catch(function () { cerrar('error'); });
       if (this.alCambiarEstado) this.alCambiarEstado();
       return true;
     },
@@ -109,6 +115,15 @@
     })()
   };
 
-  try { S.activo = localStorage.getItem('polya.sonido') !== '0'; } catch (e) {}
+  /* El sonido está SIEMPRE activo.
+     Antes esta línea leía un valor guardado por el botón de silencio:
+       S.activo = localStorage.getItem('polya.sonido') !== '0';
+     Al quitar ese botón, quien lo hubiera pulsado alguna vez quedaba
+     con el sonido apagado para siempre, sin forma de reactivarlo: todo
+     se reproducía a volumen cero, sin errores y sin avisar.
+     Sin botón que lo cambie, no tiene sentido recordar nada. */
+  /* Borra el ajuste antiguo por si quedó guardado en algún equipo. */
+  try { localStorage.removeItem('polya.sonido'); } catch (e) {}
+
   window.SONIDO = S;
 })();
